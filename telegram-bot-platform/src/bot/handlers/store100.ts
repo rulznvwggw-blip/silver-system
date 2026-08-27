@@ -77,7 +77,7 @@ export async function handlePackageDetail(ctx: Context, packageId: string): Prom
   const user = await db.getUser(userId);
   const balance = user?.balance || 0;
 
-  const checkoutUrl = `https://rullzyestorepremium.my.id/checkout?plan=${pkg.id}`;
+  const checkoutUrl = `https://store.rullzyestorepremium.my.id/checkout?plan=${pkg.id}`;
 
   const keyboard = new InlineKeyboard()
     .text(`💰 Bayar Pakai Saldo (Saldo: Rp ${balance.toLocaleString('id-ID')})`, `p100_buysaldo_${pkg.id}`)
@@ -126,7 +126,7 @@ export async function handleBuyWithBalance(ctx: Context, packageId: string): Pro
     const keyboard = new InlineKeyboard()
       .text('💳 Top Up Saldo Sekarang', 'wallet_topup')
       .row()
-      .url('📲 Bayar via QRIS Langsung', `https://rullzyestorepremium.my.id/checkout?plan=${pkg.id}`)
+      .url('📲 Bayar via QRIS Langsung', `https://store.rullzyestorepremium.my.id/checkout?plan=${pkg.id}`)
       .row()
       .text('⬅️ Kembali', `p100_detail_${pkg.id}`);
 

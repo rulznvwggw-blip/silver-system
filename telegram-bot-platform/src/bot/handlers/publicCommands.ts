@@ -21,7 +21,7 @@ export async function cmdBeli(ctx: Context): Promise<void> {
     .row()
     .text('🚀 30 Hari (Bulanan Standard)', 's300_dur_30d_whatsapp_1')
     .row()
-    .url('🌐 Buka Mini App Canvas', 'https://rullzyestorepremium.my.id');
+    .url('🌐 Buka Mini App Canvas', 'https://store.rullzyestorepremium.my.id');
 
   const text = `🛍️ **WIZARD PEMILIHAN PAKET HOSTING**
 ━━━━━━━━━━━━━━━━━━━━
@@ -114,7 +114,7 @@ export async function cmdPanel(ctx: Context): Promise<void> {
   const keyboard = new InlineKeyboard()
     .url('💻 BUKA WEB PANEL PTERODACTYL 🚀', 'https://ptero.rullzyestorepremium.my.id')
     .row()
-    .url('🌐 Website Utama RullzyeStore', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Website Utama RullzyeStore', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('📦 Layanan & Server Saya', 'menu_my_servers')
     .row()
@@ -138,7 +138,7 @@ export async function cmdPanel(ctx: Context): Promise<void> {
 // 9. /status & /uptime
 export async function cmdStatus(ctx: Context): Promise<void> {
   const keyboard = new InlineKeyboard()
-    .url('📊 Cek Live Status Web', 'https://rullzyestorepremium.my.id/#features')
+    .url('📊 Cek Live Status Web', 'https://store.rullzyestorepremium.my.id/status')
     .row()
     .text('🔄 Refresh Status', 'menu_stats');
 
@@ -243,7 +243,7 @@ export async function cmdTutorial(ctx: Context): Promise<void> {
 // 16. /rules & /tos
 export async function cmdRules(ctx: Context): Promise<void> {
   const keyboard = new InlineKeyboard()
-    .url('🌐 Baca Terms of Service Lengkap', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Baca Terms of Service Lengkap', 'https://store.rullzyestorepremium.my.id/terms')
     .row()
     .text('⬅️ Kembali', 'menu_main');
 
@@ -283,7 +283,7 @@ Jika Anda membutuhkan bantuan setup, aktivasi pesanan, kendala server, atau kons
 
 📱 **WhatsApp Official:** \`+62 812-3456-7890\`
 💬 **Jam Operasional:** \`24 Jam Nonstop (Senin - Minggu)\`
-🌐 **Website:** \`https://rullzyestorepremium.my.id\`
+🌐 **Website:** \`https://store.rullzyestorepremium.my.id\`
 
 👉 *Silakan klik tombol di bawah untuk langsung terhubung dengan customer support kami:*`;
 
@@ -321,9 +321,9 @@ export async function cmdPing(ctx: Context): Promise<void> {
 // 19. /miniapp
 export async function cmdMiniApp(ctx: Context): Promise<void> {
   const keyboard = new InlineKeyboard()
-    .url('📱 BUKA RULLZYESTORE MINI APP (CANVAS) 🚀', 'https://rullzyestorepremium.my.id')
+    .url('📱 BUKA RULLZYESTORE MINI APP (CANVAS) 🚀', 'https://store.rullzyestorepremium.my.id')
     .row()
-    .url('🛒 Buka Website Store', 'https://rullzyestorepremium.my.id')
+    .url('🛒 Buka Website Store', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('⬅️ Kembali', 'menu_main');
 

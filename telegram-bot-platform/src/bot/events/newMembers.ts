@@ -11,7 +11,7 @@ export async function handleNewChatMembers(ctx: Context): Promise<void> {
       .text('📜 Baca Rules Grup', 'view_rules')
       .url('📣 Official Channel', 'https://t.me/rullzyestore_official')
       .row()
-      .url('🌐 Website Komunitas', 'https://rullzyestorepremium.my.id')
+      .url('🌐 Website Komunitas', 'https://store.rullzyestorepremium.my.id')
       .url('🆘 Bantuan Admin', 'https://t.me/rullzye');
 
     const greeting = `🎉 **Welcome!**

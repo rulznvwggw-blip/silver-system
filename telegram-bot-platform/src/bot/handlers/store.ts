@@ -102,7 +102,7 @@ export const STORE_PRODUCTS: Record<string, StoreProduct[]> = {
 
 export async function handleStoreMenu(ctx: Context): Promise<void> {
   const keyboard = new InlineKeyboard()
-    .url('📱 Buka Mini App Interaktif 🚀', 'https://rullzyestorepremium.my.id')
+    .url('📱 Buka Mini App Interaktif 🚀', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('🟢 Bot WhatsApp (Baileys)', 'store_cat_whatsapp')
     .row()
@@ -111,7 +111,7 @@ export async function handleStoreMenu(ctx: Context): Promise<void> {
     .text('⛏️ Minecraft Server (Java)', 'store_cat_minecraft')
     .row()
     .text('🎟️ Lihat Voucher Diskon', 'menu_coupons')
-    .url('🌐 Buka Website Store', 'https://rullzyestorepremium.my.id/#pricing')
+    .url('🌐 Buka Website Store', 'https://store.rullzyestorepremium.my.id/#pricing')
     .row()
     .text('⬅️ Kembali ke Menu Utama', 'menu_main');
 
@@ -181,7 +181,7 @@ export async function handleStoreProductDetail(ctx: Context, planId: string): Pr
     return;
   }
 
-  const checkoutUrl = `https://rullzyestorepremium.my.id/checkout?plan=${product.id}`;
+  const checkoutUrl = `https://store.rullzyestorepremium.my.id/checkout?plan=${product.id}`;
 
   const keyboard = new InlineKeyboard()
     .url('💳 Pesan & Bayar Instan (QRIS / VA)', checkoutUrl)

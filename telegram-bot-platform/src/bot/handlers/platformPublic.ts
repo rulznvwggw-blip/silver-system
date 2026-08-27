@@ -51,7 +51,7 @@ export async function handlePubHome(ctx: Context): Promise<void> {
     .text('👤 Akun Saya', 'nav_pub_profile')
     .row()
     .text('🆘 Bantuan & Support', 'nav_pub_help_center')
-    .url('🌐 Web Store', 'https://rullzyestorepremium.my.id');
+    .url('🌐 Web Store', 'https://store.rullzyestorepremium.my.id');
 
   await sendOrEdit(ctx, `${header}\n\n${body}`, keyboard);
 }
@@ -356,7 +356,7 @@ export async function handlePubCheckout(ctx: Context): Promise<void> {
   }
 
   keyboard
-    .url('📲 Bayar via QRIS Otomatis', 'https://rullzyestorepremium.my.id')
+    .url('📲 Bayar via QRIS Otomatis', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('🛒 Kembali ke Keranjang', 'nav_pub_cart')
     .text('🏠 Home', 'nav_pub_home');
@@ -1020,7 +1020,7 @@ export async function handlePubBalance(ctx: Context): Promise<void> {
     .text('➕ Rp 50.000', 'topup_nominal_50000')
     .text('➕ Rp 100.000', 'topup_nominal_100000')
     .row()
-    .url('🌐 Top Up di Website', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Top Up di Website', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('⬅️ Profil', 'nav_pub_profile')
     .text('🏠 Home', 'nav_pub_home');
@@ -1610,7 +1610,7 @@ export async function handlePubDocs(ctx: Context): Promise<void> {
     `4. 📁 **SFTP & File Manager:** Cara upload file zip dan backup data.`;
 
   const keyboard = new InlineKeyboard()
-    .url('🌐 Buka Dokumentasi Web', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Buka Dokumentasi Web', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('⬅️ Pusat Bantuan', 'nav_pub_help_center')
     .text('🏠 Home', 'nav_pub_home');
@@ -1674,7 +1674,7 @@ export async function handlePubAbout(ctx: Context): Promise<void> {
     `• **Dikelola oleh:** \`Rullzye Cloud Team\``;
 
   const keyboard = new InlineKeyboard()
-    .url('🌐 Kunjungi Website Resmi', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Kunjungi Website Resmi', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('⬅️ Pusat Bantuan', 'nav_pub_help_center')
     .text('🏠 Home', 'nav_pub_home');

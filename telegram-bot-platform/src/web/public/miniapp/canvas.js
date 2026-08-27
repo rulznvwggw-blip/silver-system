@@ -202,7 +202,7 @@ function renderProducts() {
         </div>
       </div>
       <p class="text-xs text-slate-300 italic bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">"${p.desc}"</p>
-      <a href="https://rullzyestorepremium.my.id/checkout?plan=${p.id}" target="_blank" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-emerald-400 hover:from-brand-400 hover:to-emerald-300 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md">
+      <a href="https://store.rullzyestorepremium.my.id/checkout?plan=${p.id}" target="_blank" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-emerald-400 hover:from-brand-400 hover:to-emerald-300 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md">
         <i data-lucide="zap" class="w-3.5 h-3.5"></i>
         Pesan & Bayar QRIS Instan (${p.duration})
       </a>

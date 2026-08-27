@@ -155,7 +155,7 @@ export async function handleAdmSystemStatus(ctx: Context): Promise<void> {
     `🟢 **Pterodactyl Web Panel:** \`ONLINE 💚\` (Port 8080 / 443)\n` +
     `🟢 **Database SQLite:** \`CONNECTED (WAL Mode ACID)\`\n` +
     `🟢 **Public Node Host:** \`pteronode.rullzyestorepremium.my.id\`\n` +
-    `🟢 **Public Store:** \`https://rullzyestorepremium.my.id\`\n` +
+    `🟢 **Public Store:** \`https://store.rullzyestorepremium.my.id\`\n` +
     `🛡️ **Memory & CPU Guard:** \`Optimal (0% Throttling)\``;
 
   const keyboard = new InlineKeyboard()
@@ -656,7 +656,7 @@ export async function handleAdmAiBroadcast(ctx: Context): Promise<void> {
     `⚡ _Deploy Instan 5 Detik • Proteksi Anti-DDoS 100 Gbps • Uptime 24/7_\n\n` +
     `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
     `🛒 Sewa langsung di bot: @cinerestbot\n` +
-    `🌐 Website: https://rullzyestorepremium.my.id`;
+    `🌐 Website: https://store.rullzyestorepremium.my.id`;
 
   let sent = 0;
   let failed = 0;

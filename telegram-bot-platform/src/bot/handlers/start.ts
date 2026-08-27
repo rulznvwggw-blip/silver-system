@@ -49,7 +49,7 @@ export async function handleStart(ctx: Context): Promise<void> {
   if (isAdmin) {
     // ADMIN VIEW: Full Master Admin Hub + User Control
     keyboard
-      .url('📱 BUKA RULLZYESTORE MINI APP (CANVAS) 🚀', 'https://rullzyestorepremium.my.id')
+      .url('📱 BUKA RULLZYESTORE MINI APP (CANVAS) 🚀', 'https://store.rullzyestorepremium.my.id')
       .row()
       .text('👑 ADMIN CONTROL CENTER', 'admin_main')
       .text('👥 Full User Control', 'admin_users')
@@ -69,7 +69,7 @@ export async function handleStart(ctx: Context): Promise<void> {
       .text('🔎 Search Komunitas', 'menu_search')
       .text('🎨 Decoration', 'menu_decoration')
       .row()
-      .url('🌐 Website Store', 'https://rullzyestorepremium.my.id')
+      .url('🌐 Website Store', 'https://store.rullzyestorepremium.my.id')
       .url('💻 Pterodactyl Panel', 'https://ptero.rullzyestorepremium.my.id');
 
     const adminWelcomeText = `👑 **ADMINISTRATOR CONTROL CENTER [${name}]**
@@ -94,7 +94,7 @@ Gunakan modul di bawah untuk mengontrol pengguna, saldo, broadcast AI, dan serve
 
   // REGULAR USER VIEW: Clean Hosting Store & Client Area (Zero Admin Leaks!)
   keyboard
-    .url('📱 BUKA RULLZYESTORE MINI APP (CANVAS) 🚀', 'https://rullzyestorepremium.my.id')
+    .url('📱 BUKA RULLZYESTORE MINI APP (CANVAS) 🚀', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('🛒 Beli Hosting (7, 14, 30 Hari)', 's300_dur_30d_whatsapp_1')
     .row()
@@ -110,7 +110,7 @@ Gunakan modul di bawah untuk mengontrol pengguna, saldo, broadcast AI, dan serve
     .text('🔎 Cari Komunitas & Grup', 'menu_search')
     .url('💬 Chat Support WhatsApp', 'https://wa.me/6281234567890?text=Halo%20Admin%20RullzyeStore,%20saya%20ingin%20bertanya%20tentang%20sewa%20hosting.')
     .row()
-    .url('🌐 Website Utama RullzyeStore', 'https://rullzyestorepremium.my.id');
+    .url('🌐 Website Utama RullzyeStore', 'https://store.rullzyestorepremium.my.id');
 
   const userWelcomeText = `👋 **Halo, ${name}!**
 Selamat datang di **RullzyeStore Cloud & Bot Hosting Indonesia** 🚀

@@ -87,7 +87,7 @@ export const FALLBACK_COMMUNITY_DECORATION = {
 4️⃣ Gunakan bahasa yang santun
 
 🔗 **LINK PENTING & OFFICIAL:**
-• Website: https://rullzyestorepremium.my.id
+• Website: https://store.rullzyestorepremium.my.id
 • Channel: @rullzyestore_official
 • Support Admin: @rullzye
 

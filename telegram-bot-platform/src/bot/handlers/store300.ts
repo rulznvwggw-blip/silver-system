@@ -68,7 +68,7 @@ export async function handleStore300Catalog(
   // 5. Mini App & Main Menu
   keyboard
     .row()
-    .url('🌐 Buka Mini App Canvas 🚀', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Buka Mini App Canvas 🚀', 'https://store.rullzyestorepremium.my.id')
     .row()
     .text('🏠 Menu Utama', 'menu_main');
 
@@ -111,7 +111,7 @@ export async function handlePackage300Detail(ctx: Context, packageId: string): P
   const user = await db.getUser(userId);
   const balance = user?.balance || 0;
 
-  const checkoutUrl = `https://rullzyestorepremium.my.id/checkout?plan=${pkg.id}`;
+  const checkoutUrl = `https://store.rullzyestorepremium.my.id/checkout?plan=${pkg.id}`;
 
   const keyboard = new InlineKeyboard()
     .text(`💰 Bayar Pakai Saldo (Saldo: Rp ${balance.toLocaleString('id-ID')})`, `s300_buysaldo_${pkg.id}`)
@@ -163,7 +163,7 @@ export async function handleBuy300WithBalance(ctx: Context, packageId: string): 
     const keyboard = new InlineKeyboard()
       .text('💳 Top Up Saldo Sekarang', 'wallet_topup')
       .row()
-      .url('📲 Bayar via QRIS Langsung', `https://rullzyestorepremium.my.id/checkout?plan=${pkg.id}`)
+      .url('📲 Bayar via QRIS Langsung', `https://store.rullzyestorepremium.my.id/checkout?plan=${pkg.id}`)
       .row()
       .text('⬅️ Kembali', `s300_detail_${pkg.id}`);
 

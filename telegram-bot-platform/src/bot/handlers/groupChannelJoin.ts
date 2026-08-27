@@ -32,8 +32,8 @@ export async function handleSetupCommunityViaChatId(ctx: Context, targetIdStr: s
 
     // 3. Post Auto-Decoration into Group / Channel
     const storeKeyboard = new InlineKeyboard()
-      .url('🛒 Sewa Server Bot & Game', 'https://rullzyestorepremium.my.id')
-      .url('📱 Buka Mini App', 'https://rullzyestorepremium.my.id')
+      .url('🛒 Sewa Server Bot & Game', 'https://store.rullzyestorepremium.my.id')
+      .url('📱 Buka Mini App', 'https://store.rullzyestorepremium.my.id')
       .row()
       .url('💬 Chat Admin WhatsApp', 'https://wa.me/6281234567890');
 
