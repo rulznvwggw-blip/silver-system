@@ -83,7 +83,7 @@ export class PaymentService {
         },
       });
 
-      const userPassword = (user as any).tempPassword || ('Rullzye_' + Math.random().toString(36).slice(-6) + '!1');
+      const userPassword = (user as any).tempPassword || `Rullzye_${Math.random().toString(36).substring(2, 8)}!1`;
 
       serverData = {
         id: pteroServer.server.id,
@@ -126,52 +126,8 @@ export class PaymentService {
       order.serverId = `srv-${pteroServer.server.id}`;
       order.serverDetails = serverData;
     } catch (err: unknown) {
-      console.error('Provisioning warning / fallback to simulated node:', err);
-      // Resilient fallback for offline API or demo instances
-      const mockPort = 3000 + Math.floor(Math.random() * 50);
-      const mockId = Math.floor(Math.random() * 900) + 100;
-      const fallbackPassword = 'Rullzye_' + Math.random().toString(36).slice(-6) + '!1';
-      const fallbackUsername = order.customer.username || order.customer.email.split('@')[0];
-
-      serverData = {
-        id: mockId,
-        uuid: `uuid-${Date.now()}`,
-        identifier: `srv${mockId}`,
-        name: order.item.serverName || `${plan.name} - ${order.customer.name}`,
-        node: 'Node-Main-01',
-        ipAddress: 'pteronode.rullzyestorepremium.my.id',
-        port: mockPort,
-        panelUrl: 'https://ptero.rullzyestorepremium.my.id',
-        username: fallbackUsername,
-        password: fallbackPassword,
-      };
-
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      store.addServer({
-        id: `srv-${mockId}`,
-        pteroId: mockId,
-        uuid: serverData.uuid,
-        identifier: serverData.identifier,
-        name: serverData.name,
-        category: plan.category,
-        planName: plan.name,
-        customerEmail: order.customer.email,
-        customerName: order.customer.name,
-        ipAddress: serverData.ipAddress,
-        port: serverData.port,
-        ram: plan.specs.ram,
-        cpu: plan.specs.cpu,
-        disk: plan.specs.disk,
-        status: 'running',
-        createdAt: paidAt,
-        expiresAt,
-        panelUrl: serverData.panelUrl,
-        username: fallbackUsername,
-        password: fallbackPassword,
-      });
-
-      order.serverId = `srv-${mockId}`;
-      order.serverDetails = serverData;
+      console.error('[REAL PROVISIONING ERROR]', err);
+      throw new Error(`Gagal membuat server di Pterodactyl: ${(err as Error).message}`);
     }
 
     return order;

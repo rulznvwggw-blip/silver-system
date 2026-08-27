@@ -176,8 +176,40 @@ const APP_TIERS: TierConfig[] = [
 
 // Combine all 200 Product Plans (60 + 60 + 60 + 20 = 200)
 export const PRODUCT_PLANS: ProductPlan[] = [
-  ...generateWebProducts('whatsapp', 1, 15, 'ghcr.io/pterodactyl/yolks:nodejs_20', 'node index.js', { MAIN_FILE: 'index.js' }, WA_TIERS),
-  ...generateWebProducts('telegram', 1, 16, 'ghcr.io/pterodactyl/yolks:python_3.11', 'python3 main.py', { BOT_START_FILE: 'main.py' }, TG_TIERS),
-  ...generateWebProducts('minecraft', 1, 2, 'ghcr.io/pterodactyl/yolks:java_21', 'java -Xms128M -XX:MaxRAMPercentage=95.0 -jar server.jar nogui', { SERVER_JARFILE: 'server.jar' }, MC_TIERS),
-  ...generateWebProducts('application', 1, 15, 'ghcr.io/pterodactyl/yolks:nodejs_20', 'node index.js', { MAIN_FILE: 'index.js' }, APP_TIERS),
+  ...generateWebProducts(
+    'whatsapp',
+    5,
+    15,
+    'ghcr.io/parkervcp/yolks:nodejs_20',
+    'node {{MAIN_FILE}}',
+    { MAIN_FILE: 'index.js', AUTO_UPDATE: '0', REINSTALL_NODE_MODULES: '0' },
+    WA_TIERS
+  ),
+  ...generateWebProducts(
+    'telegram',
+    5,
+    16,
+    'ghcr.io/parkervcp/yolks:python_3.11',
+    'python3 {{BOT_START_FILE}}',
+    { BOT_START_FILE: 'main.py', BOT_TOKEN: '' },
+    TG_TIERS
+  ),
+  ...generateWebProducts(
+    'minecraft',
+    1,
+    2,
+    'ghcr.io/pterodactyl/yolks:java_25',
+    'java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}',
+    { MINECRAFT_VERSION: 'latest', SERVER_JARFILE: 'server.jar', BUILD_NUMBER: 'latest' },
+    MC_TIERS
+  ),
+  ...generateWebProducts(
+    'application',
+    6,
+    17,
+    'ghcr.io/parkervcp/yolks:debian',
+    'chmod +x {{STARTUP_SCRIPT}} && ./{{STARTUP_SCRIPT}}',
+    { STARTUP_SCRIPT: 'start.sh', APP_PORT: '{{SERVER_PORT}}' },
+    APP_TIERS
+  ),
 ];

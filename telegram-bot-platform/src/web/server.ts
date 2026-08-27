@@ -156,7 +156,7 @@ export function createWebServer(): express.Express {
                     cpuPercent: product.cpu_percent,
                     diskGb: product.disk_gb,
                     eggId: product.egg_id,
-                    nestId: 1,
+                    nestId: product.category_id === 'minecraft' ? 1 : product.category_id === 'whatsapp' || product.category_id === 'telegram' ? 5 : 6,
                     dockerImage: product.docker_image,
                     description: product.description,
                     badge: product.badge,

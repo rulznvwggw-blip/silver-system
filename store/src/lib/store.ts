@@ -290,4 +290,4 @@ Dengan **Pterodactyl Game & App Panel**:
 // Global singleton instance
 const globalForStore = globalThis as unknown as { storeManager?: StoreManager };
 export const store = globalForStore.storeManager || new StoreManager();
-if (process.env.NODE_ENV !== 'production') globalForStore.storeManager = store;
+globalForStore.storeManager = store;

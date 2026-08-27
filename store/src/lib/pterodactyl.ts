@@ -73,14 +73,32 @@ export class PterodactylService {
   }
 
   static async createUser(data: CreateUserData) {
+    const cleanUsername = (data.username || `user_${Math.random().toString(36).substring(2, 7)}`).replace(/[^a-zA-Z0-9_]/g, '').toLowerCase().slice(0, 16);
+    const userPassword = data.password || `Rullzye_${Math.random().toString(36).substring(2, 8)}!1`;
+
     const existing = await this.findUserByEmail(data.email);
     if (existing) {
-      return existing;
+      // Sync/update existing user password in Pterodactyl so it matches the generated password
+      try {
+        await this.request(
+          `/users/${existing.id}`,
+          'PATCH',
+          {
+            email: existing.email,
+            username: existing.username,
+            first_name: data.firstName || 'Customer',
+            last_name: data.lastName || 'RullzyeStore',
+            password: userPassword,
+          }
+        );
+      } catch (patchErr) {
+        console.warn('Failed to update existing user password:', patchErr);
+      }
+      return {
+        ...existing,
+        tempPassword: userPassword,
+      };
     }
-
-    // Clean username (alphanumeric only)
-    const cleanUsername = data.username.replace(/[^a-zA-Z0-9_]/g, '') || `user_${Math.random().toString(36).substring(2, 7)}`;
-    const randomPassword = data.password || Math.random().toString(36).substring(2, 10) + '!A1';
 
     const res = await this.request<{ attributes: { id: number; email: string; username: string } }>(
       '/users',
@@ -90,24 +108,23 @@ export class PterodactylService {
         username: cleanUsername,
         first_name: data.firstName || 'Customer',
         last_name: data.lastName || 'RullzyeStore',
-        password: randomPassword,
+        password: userPassword,
       }
     );
 
     return {
       ...res.attributes,
-      tempPassword: randomPassword,
+      tempPassword: userPassword,
     };
   }
 
   static async getFirstAvailableAllocation(nodeId: number = 1) {
     const res = await this.request<{ data: Array<{ attributes: { id: number; ip: string; port: number; assigned: boolean } }> }>(
-      `/nodes/${nodeId}/allocations`
+      `/nodes/${nodeId}/allocations?per_page=100`
     );
 
     const available = res.data.find(a => !a.attributes.assigned);
     if (!available) {
-      // Return first allocation or fallback
       if (res.data.length > 0) return res.data[0].attributes;
       throw new Error('No available port allocations found on this Node.');
     }
@@ -130,12 +147,7 @@ export class PterodactylService {
       allocation: {
         default: allocation.id,
       },
-      deploy: {
-        locations: [1],
-        dedicated_ip: false,
-        port_range: [],
-      },
-      start_on_completion: true,
+      start_on_completion: false,
     };
 
     const res = await this.request<{ attributes: { id: number; uuid: string; identifier: string; name: string } }>(

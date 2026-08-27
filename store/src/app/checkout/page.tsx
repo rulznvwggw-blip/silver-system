@@ -53,6 +53,7 @@ function CheckoutContent() {
   const [isProvisioning, setIsProvisioning] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
 
   useEffect(() => {
     const plan = PRODUCT_PLANS.find(p => p.id === planParam) || PRODUCT_PLANS[0];
@@ -118,6 +119,7 @@ function CheckoutContent() {
     }
 
     setIsSubmitting(true);
+    setPaymentError('');
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -148,19 +150,14 @@ function CheckoutContent() {
     }
   };
 
-  // Simulate Instant Payment & Live Provisioning
+  // Live Payment Verification & Provisioning
   const handleConfirmPayment = async () => {
     if (!currentOrder) return;
     setIsProvisioning(true);
+    setPaymentError('');
 
-    // Simulated progress stages
-    setProvisioningStep(1); // Verifying payment
-    await new Promise(r => setTimeout(r, 1200));
+    setProvisioningStep(1); // Verifying payment with Flowix
 
-    setProvisioningStep(2); // Creating user account
-    await new Promise(r => setTimeout(r, 1500));
-
-    setProvisioningStep(3); // Allocating port & spawning docker container
     try {
       const res = await fetch('/api/payments/pay', {
         method: 'POST',
@@ -168,17 +165,24 @@ function CheckoutContent() {
         body: JSON.stringify({ orderId: currentOrder.id }),
       });
       const data = await res.json();
-      if (data.success) {
-        setCurrentOrder(data.data);
-      }
-    } catch (err) {
-      console.error(err);
-    }
 
-    setProvisioningStep(4); // Finished
-    await new Promise(r => setTimeout(r, 800));
-    setIsProvisioning(false);
-    setIsSuccess(true);
+      if (data.success && data.data) {
+        setProvisioningStep(2); // Setting up user
+        await new Promise(r => setTimeout(r, 600));
+        setProvisioningStep(3); // Deploying container
+        await new Promise(r => setTimeout(r, 800));
+        setProvisioningStep(4); // Finished
+        setCurrentOrder(data.data);
+        setIsProvisioning(false);
+        setIsSuccess(true);
+      } else {
+        setIsProvisioning(false);
+        setPaymentError(data.message || 'Pembayaran belum terdeteksi. Silakan bayar melalui QRIS lalu klik cek status kembali.');
+      }
+    } catch (err: any) {
+      setIsProvisioning(false);
+      setPaymentError(err.message || 'Terjadi kesalahan saat memeriksa pembayaran ke gateway.');
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -313,18 +317,29 @@ function CheckoutContent() {
                       </div>
                     )}
 
-                    {/* Instant Simulated Confirm Payment Button */}
+                    {/* Payment Error Alert */}
+                    {paymentError && (
+                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 shadow-lg">
+                        <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-bold text-amber-200">Status Pembayaran:</div>
+                          <div>{paymentError}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Instant Check Payment & Provision Button */}
                     <div className="space-y-3 pt-2">
                       <button
                         onClick={handleConfirmPayment}
                         className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-dark-bg font-black text-base shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
                       >
                         <Zap className="w-5 h-5 fill-current" />
-                        SAYA SUDAH BAYAR (AKTIFKAN SERVER SEKARANG)
+                        🔍 CEK STATUS PEMBAYARAN & AKTIFKAN SERVER
                       </button>
                       <p className="text-[11px] text-center text-slate-400 flex items-center justify-center gap-1.5">
                         <ShieldCheck className="w-4 h-4 text-brand-400" />
-                        Pembayaran diverifikasi secara instan via Webhook Gateway.
+                        Server hanya akan dibuat otomatis setelah QRIS sukses terverifikasi.
                       </p>
                     </div>
                   </div>
