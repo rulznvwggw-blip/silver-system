@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RullzyeStore - Telegram Bot Management Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Lucide Icons & Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#38bdf8',
+              500: '#0284c7',
+              600: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen antialiased">
+  <!-- Top Navigation -->
+  <header class="bg-slate-900/80 border-b border-slate-800 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center font-bold text-slate-950">
+          🤖
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg tracking-tight">RULLZYE<span class="text-brand-400">BOT</span></h1>
+          <p class="text-[10px] text-slate-400 uppercase tracking-wider">Management Platform</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs">
+        <div class="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Super Admin: <strong class="font-mono">7128038268</strong></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Quick Metric Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
+        <div class="text-xs text-slate-400 flex justify-between items-center">
+          <span>Grup & Channel</span>
+          <i data-lucide="users" class="w-4 h-4 text-brand-400"></i>
+        </div>
+        <div id="stat-communities" class="text-2xl font-black text-white">--</div>
+        <div class="text-[11px] text-slate-500">Terhubung & Aktif</div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
+        <div class="text-xs text-slate-400 flex justify-between items-center">
+          <span>Total Jangkauan</span>
+          <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <div id="stat-members" class="text-2xl font-black text-emerald-400">--</div>
+        <div class="text-[11px] text-slate-500">Member Komunitas</div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
+        <div class="text-xs text-slate-400 flex justify-between items-center">
+          <span>Success Rate</span>
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-cyan-400"></i>
+        </div>
+        <div id="stat-rate" class="text-2xl font-black text-white">--%</div>
+        <div class="text-[11px] text-cyan-400">Pengiriman Sukses</div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
+        <div class="text-xs text-slate-400 flex justify-between items-center">
+          <span>Scheduler 30-Mnt</span>
+          <i data-lucide="clock" class="w-4 h-4 text-purple-400"></i>
+        </div>
+        <div id="stat-scheduler" class="text-xl font-black text-purple-400">RUNNING 🟢</div>
+        <div class="text-[11px] text-slate-500">Asia/Jakarta Timezone</div>
+      </div>
+    </div>
+
+    <!-- Main 2-Column Action & Log Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Left: Quick AI Broadcast Form -->
+      <div class="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="send" class="w-5 h-5 text-brand-400"></i>
+          Dispatch Instant AI Broadcast
+        </h2>
+
+        <form id="broadcast-form" class="space-y-4 text-xs">
+          <div class="space-y-1">
+            <label class="text-slate-300 font-medium">Tema / Topik Broadcast</label>
+            <input type="text" id="bc-topic" placeholder="Cth: Update Server Minecraft TPS 20.0" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-brand-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="text-slate-300 font-medium">Target Tujuan</label>
+              <select id="bc-target" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none">
+                <option value="all">🌐 Semua (Grup + Channel)</option>
+                <option value="groups">👥 Grup Saja</option>
+                <option value="channels">📣 Channel Saja</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="text-slate-300 font-medium">Tone AI</label>
+              <select id="bc-tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none">
+                <option value="friendly">😊 Friendly</option>
+                <option value="professional">💼 Professional</option>
+                <option value="promotional">🔥 Promotional</option>
+                <option value="educational">📚 Educational</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" id="btn-generate-ai" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-brand-400 font-bold border border-slate-700 transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            1. Generate Konten dengan AI
+          </button>
+
+          <div class="space-y-1">
+            <label class="text-slate-300 font-medium">Konten Pesan (Markdown)</label>
+            <textarea id="bc-content" rows="6" placeholder="Hasil copywriting AI atau ketik manual..." required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white font-mono focus:outline-none focus:border-brand-500"></textarea>
+          </div>
+
+          <button type="submit" id="btn-submit-bc" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-500 to-emerald-400 text-slate-950 font-black text-sm shadow-lg shadow-brand-500/20 hover:scale-[1.01] transition-transform flex items-center justify-center gap-2">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            2. Kirim ke BullMQ Queue
+          </button>
+        </form>
+      </div>
+
+      <!-- Right: Communities Directory & Logs -->
+      <div class="lg:col-span-6 space-y-6">
+        <!-- Registered Communities -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="folder-tree" class="w-5 h-5 text-emerald-400"></i>
+            Direktori Komunitas Terdaftar
+          </h2>
+          <div id="communities-list" class="space-y-2 max-h-60 overflow-y-auto text-xs pr-1">
+            <!-- Dynamic items -->
+          </div>
+        </div>
+
+        <!-- Recent Broadcast Reports -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="activity" class="w-5 h-5 text-cyan-400"></i>
+            Riwayat & Report Broadcast
+          </h2>
+          <div id="broadcasts-list" class="space-y-2 max-h-60 overflow-y-auto text-xs pr-1 font-mono">
+            <!-- Dynamic items -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

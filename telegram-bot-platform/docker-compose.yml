@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: telegram_bot_platform
+    restart: always
+    ports:
+      - "3005:3005"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ADMIN_ID=${ADMIN_ID:-7128038268}
+      - TIMEZONE=${TIMEZONE:-Asia/Jakarta}
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/telegram_bot_db
+      - REDIS_URL=redis://redis:6379
+      - AI_API_KEY=${AI_API_KEY}
+      - AI_PROVIDER=${AI_PROVIDER:-gemini}
+      - WEB_PORT=3005
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - bot_network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: telegram_bot_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: telegram_bot_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - bot_network
+
+  redis:
+    image: redis:alpine
+    container_name: telegram_bot_redis
+    restart: always
+    volumes:
+      - redisdata:/data
+    networks:
+      - bot_network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  bot_network:
+    driver: bridge

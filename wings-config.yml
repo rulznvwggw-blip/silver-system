@@ -1,0 +1,29 @@
+debug: false
+uuid: ee9df8be-804a-4122-815e-b89451be002e
+token_id: VEVSvahBfFbbnhVD
+token: rOlxXMarg4PML2gS16nkdPMRk4a35xr9
+api:
+  host: 0.0.0.0
+  port: 8085
+  ssl:
+    enabled: false
+  upload_limit: 500
+system:
+  root_directory: /var/lib/pterodactyl
+  log_directory: /var/log/pterodactyl
+  data: /var/lib/pterodactyl/volumes
+  archive_directory: /var/lib/pterodactyl/archives
+  backup_directory: /var/lib/pterodactyl/backups
+  tmp_directory: /tmp/pterodactyl
+  sftp:
+    bind_port: 2022
+docker:
+  network:
+    name: pterodactyl0
+    driver: bridge
+    interfaces:
+      v4:
+        subnet: 172.28.0.0/16
+        gateway: 172.28.0.1
+allowed_mounts: []
+remote: 'https://ptero.rullzyestorepremium.my.id'

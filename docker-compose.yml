@@ -1,0 +1,65 @@
+networks:
+  pterodactyl:
+    driver: bridge
+
+services:
+  database:
+    image: mariadb:10.11
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./data/database:/var/lib/mysql
+    environment:
+      MYSQL_REAL_IP: "127.0.0.1"
+      MYSQL_DATABASE: "${MYSQL_DATABASE:-pterodactyl}"
+      MYSQL_USER: "${MYSQL_USER:-pterodactyl}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-pterodactyl_password}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-root_password_change_me}"
+    networks:
+      - pterodactyl
+
+  cache:
+    image: redis:alpine
+    restart: always
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - pterodactyl
+
+  panel:
+    image: ghcr.io/pterodactyl/panel:latest
+    restart: always
+    ports:
+      - "8080:80"
+      - "8443:443"
+    links:
+      - database
+      - cache
+    volumes:
+      - ./data/var:/app/var/
+      - ./data/nginx:/etc/nginx/http.d/
+      - ./data/certs:/etc/letsencrypt/
+      - ./data/logs:/app/storage/logs
+    environment:
+      APP_ENV: "production"
+      APP_ENVIRONMENT_ONLY: "false"
+      APP_URL: "https://ptero.rullzyestorepremium.my.id"
+      APP_TIMEZONE: "${APP_TIMEZONE:-Asia/Jakarta}"
+      DB_HOST: "database"
+      DB_PORT: "3306"
+      DB_DATABASE: "${MYSQL_DATABASE:-pterodactyl}"
+      DB_USERNAME: "${MYSQL_USER:-pterodactyl}"
+      DB_PASSWORD: "${MYSQL_PASSWORD:-pterodactyl_password}"
+      CACHE_DRIVER: "redis"
+      SESSION_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      REDIS_HOST: "cache"
+      RECAPTCHA_ENABLED: "false"
+    networks:
+      - pterodactyl
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    network_mode: "host"
+    command: tunnel --no-autoupdate run --token eyJhIjoiMmVhNTE5M2FmNDg0ODljY2JiYWQwZTVjYjdmYWIyNmYiLCJ0IjoiYTk1YjM4NzEtY2JhMC00ZTRlLTllZWQtMTRhZmRmMWIyNDgwIiwicyI6Ik5UYzFOMlUxWkRRdE5ERXpNUzAwWkdJNUxXSTRZamt0TldVM05ESXhZMlkzTmpobCJ9
