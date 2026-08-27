@@ -99,6 +99,7 @@ export interface Order {
     port: number;
     panelUrl: string;
     username: string;
+    password?: string;
   };
 }
 
@@ -121,6 +122,8 @@ export interface ProvisionedServer {
   createdAt: string;
   expiresAt: string;
   panelUrl: string;
+  username?: string;
+  password?: string;
 }
 
 export interface Ticket {

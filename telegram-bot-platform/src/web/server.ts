@@ -5,6 +5,7 @@ import fs from 'fs';
 import { db } from '../database/db.js';
 import { aiProvider } from '../ai/provider.js';
 import { broadcastQueue } from '../queue/queues.js';
+import { pterodactylService } from '../services/pterodactylService.js';
 import { SUPER_ADMIN_ID } from '../config/constants.js';
 
 export function createWebServer(): express.Express {
@@ -131,14 +132,83 @@ export function createWebServer(): express.Express {
         if (deposit) {
           if (data.status === 'success' && deposit.status !== 'success') {
             await db.updateDepositStatus(data.reff_id, 'success', new Date());
-            const creditedAmount = data.amount || deposit.amount_request;
-            await db.addBalance(deposit.telegram_id, creditedAmount, `Top Up Flowix QRIS (${data.reff_id})`);
-            await db.createNotification(
-              deposit.telegram_id,
-              '🎉 Top Up Saldo Berhasil!',
-              `Pembayaran QRIS ${data.reff_id} sebesar Rp ${creditedAmount.toLocaleString('id-ID')} telah berhasil diverifikasi dan saldo telah ditambahkan.`
-            );
-            console.log(`[FLOWIX WEBHOOK] Credited Rp ${creditedAmount} to User ${deposit.telegram_id}`);
+
+            if (deposit.product_id) {
+              // Direct Product Purchase via QRIS
+              const product = await db.getProductById(deposit.product_id);
+              if (product) {
+                try {
+                  const user = await db.getUser(deposit.telegram_id);
+                  const pteroData = await pterodactylService.getOrCreateUser(deposit.telegram_id, user?.first_name || 'Customer', user?.username);
+                  const pteroUser = pteroData.user;
+                  const password = pteroData.generatedPassword;
+
+                  const mockPackage = {
+                    id: product.id,
+                    category: product.category_id as any,
+                    tier: 1,
+                    name: product.name,
+                    duration: '30d' as any,
+                    durationLabel: product.duration_label,
+                    durationDays: product.duration_days,
+                    price: product.price,
+                    ramMb: product.ram_mb,
+                    cpuPercent: product.cpu_percent,
+                    diskGb: product.disk_gb,
+                    eggId: product.egg_id,
+                    nestId: 1,
+                    dockerImage: product.docker_image,
+                    description: product.description,
+                    badge: product.badge,
+                  };
+
+                  const serverResult = await pterodactylService.createServer(pteroUser.id, mockPackage, `${product.name} - ${user?.first_name || 'User'}`);
+                  const expiresAt = new Date(Date.now() + product.duration_days * 24 * 60 * 60 * 1000);
+
+                  await db.recordUserServer({
+                    telegram_id: deposit.telegram_id,
+                    server_id: serverResult.serverId,
+                    server_identifier: serverResult.serverIdentifier,
+                    server_name: serverResult.name,
+                    package_id: product.id,
+                    duration_days: product.duration_days,
+                    port: serverResult.port,
+                    status: 'active',
+                    expires_at: expiresAt,
+                  });
+
+                  await db.createOrder({
+                    telegram_id: deposit.telegram_id,
+                    product_id: product.id,
+                    product_name: product.name,
+                    total_amount: product.price,
+                    payment_method: 'QRIS_FLOWIX',
+                    payment_status: 'PAID',
+                    order_status: 'COMPLETED',
+                    server_id: serverResult.serverId,
+                  });
+
+                  await db.createNotification(
+                    deposit.telegram_id,
+                    '🎉 Server Berhasil Diaktifkan!',
+                    `Server ${product.name} aktif! Login: Username '${pteroUser.username}' Password '${password}' di ${serverResult.panelUrl}`
+                  );
+                } catch (provErr) {
+                  console.error('[WEBHOOK AUTO-PROVISION ERROR]', provErr);
+                  await db.addBalance(deposit.telegram_id, product.price, `Kompensasi Saldo Server (${data.reff_id})`);
+                }
+              }
+            } else {
+              // Regular Top Up
+              const creditedAmount = data.amount || deposit.amount_request;
+              await db.addBalance(deposit.telegram_id, creditedAmount, `Top Up Flowix QRIS (${data.reff_id})`);
+              await db.createNotification(
+                deposit.telegram_id,
+                '🎉 Top Up Saldo Berhasil!',
+                `Pembayaran QRIS ${data.reff_id} sebesar Rp ${creditedAmount.toLocaleString('id-ID')} telah berhasil diverifikasi dan saldo telah ditambahkan.`
+              );
+              console.log(`[FLOWIX WEBHOOK] Credited Rp ${creditedAmount} to User ${deposit.telegram_id}`);
+            }
           } else if (data.status === 'failed' || data.status === 'expired' || data.status === 'canceled') {
             await db.updateDepositStatus(data.reff_id, data.status);
           }

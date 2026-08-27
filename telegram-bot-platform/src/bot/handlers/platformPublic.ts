@@ -1068,14 +1068,14 @@ export async function handlePubCreateFlowixDeposit(ctx: Context, amount: number,
       `⏱️ **Batas Waktu:** \`${expiredAt.toLocaleString('id-ID')}\`\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `👉 **PANDUAN PEMBAYARAN:**\n` +
-      `1. Klik tombol **🌐 Buka Halaman Bayar** di bawah ATAU gunakan QRIS.\n` +
-      `2. Buka aplikasi BCA / Dana / GoPay / OVO / ShopeePay / Banking Anda.\n` +
-      `3. Scan kode QR dan selesaikan pembayaran sesuai total tagihan.\n` +
+      `1. Scan QRIS di atas ATAU klik tombol **🌐 Buka Halaman Bayar** di bawah.\n` +
+      `2. Buka BCA, BRI, BNI, Mandiri, Dana, GoPay, OVO, ShopeePay, atau m-Banking.\n` +
+      `3. Masukkan nominal tagihan tepat \`${formatRupiah(deposit.amount_total)}\`.\n` +
       `4. Setelah berhasil membayar, klik tombol **🔄 Cek Status Pembayaran** di bawah!`;
 
     const keyboard = new InlineKeyboard();
     if (deposit.pay_url) {
-      keyboard.url('🌐 Buka Halaman Bayar & QRIS', deposit.pay_url).row();
+      keyboard.url('🌐 Buka Halaman Bayar Flowix', deposit.pay_url).row();
     }
     keyboard
       .text('🔄 Cek Status Pembayaran', `check_deposit_${deposit.reff_id}`)
@@ -1083,10 +1083,236 @@ export async function handlePubCreateFlowixDeposit(ctx: Context, amount: number,
       .text('❌ Batalkan Tagihan', `cancel_deposit_${deposit.reff_id}`)
       .text('💰 Dompet Saldo', 'nav_pub_balance');
 
+    if (deposit.qr_image) {
+      try {
+        await ctx.replyWithPhoto(deposit.qr_image, {
+          caption: body,
+          parse_mode: 'Markdown',
+          reply_markup: keyboard,
+        });
+        return;
+      } catch (err) {
+        console.warn('Fallback to sendOrEdit for QR image:', err);
+      }
+    }
+
     await sendOrEdit(ctx, body, keyboard);
   } catch (err: any) {
     await ctx.reply(`❌ **Gagal Membuat Deposit Flowix:** ${err.message}\n\nSilakan coba beberapa saat lagi.`);
     await handlePubBalance(ctx);
+  }
+}
+
+export async function handleBuyProductWithQris(ctx: Context, productId: string): Promise<void> {
+  const product = await db.getProductById(productId);
+  if (!product) {
+    await ctx.reply('⚠️ Produk tidak ditemukan.');
+    return;
+  }
+
+  const userId = ctx.from?.id || 0;
+  await AnimationManager.processing(ctx, `Membuat tagihan QRIS untuk ${product.name}`);
+
+  try {
+    const deposit = await flowixService.createDeposit({
+      amount: product.price,
+      method_code: 'QRIS',
+      fee_by_customer: true,
+    });
+
+    const expiredAt = deposit.expired_at ? new Date(deposit.expired_at) : new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    // Save record to DB with product_id
+    await db.createDepositRecord({
+      reff_id: deposit.reff_id,
+      pay_id: deposit.pay_id,
+      telegram_id: userId,
+      product_id: product.id,
+      amount_request: deposit.amount_request,
+      amount_total: deposit.amount_total,
+      fee: deposit.fee || 0,
+      method_code: deposit.method_code,
+      status: deposit.status || 'pending',
+      qr_image: deposit.qr_image,
+      qr_string: deposit.qr_string,
+      pay_url: deposit.pay_url,
+      expired_at: expiredAt,
+    });
+
+    const header = createCozyHeader(`💳 BELI LANGSUNG VIA QRIS: ${product.name.toUpperCase()}`, 'Scan QRIS untuk Otomatis Mengaktifkan Server');
+    const body = `${header}\n\n` +
+      `📦 **Paket:** \`${product.name}\`\n` +
+      `⏱️ **Masa Aktif:** \`${product.duration_label}\` (${product.duration_days} Hari)\n` +
+      `🆔 **Reff ID:** \`${deposit.reff_id}\`\n` +
+      `💰 **Harga Paket:** \`${formatRupiah(deposit.amount_request)}\`\n` +
+      `🏷️ **Biaya Admin Gateway:** \`${formatRupiah(deposit.fee || 0)}\`\n` +
+      `💵 **Total Tagihan QRIS:** \`${formatRupiah(deposit.amount_total)}\`\n` +
+      `⏳ **Status:** \`PENDING (Menunggu Pembayaran)\`\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `⚡ **PANDUAN AKTIVASI INSTAN:**\n` +
+      `1. Scan gambar QRIS di atas dengan aplikasi BCA / BRI / Mandiri / Dana / GoPay / OVO / ShopeePay.\n` +
+      `2. Bayar tepat sejumlah \`${formatRupiah(deposit.amount_total)}\`.\n` +
+      `3. Setelah berhasil transfer, klik tombol **🔄 Cek Status & Aktifkan Server** di bawah!\n` +
+      `4. Server Pterodactyl dan password akun akan langsung terbit 100% otomatis.`;
+
+    const keyboard = new InlineKeyboard();
+    if (deposit.pay_url) {
+      keyboard.url('🌐 Buka Halaman Bayar Flowix', deposit.pay_url).row();
+    }
+    keyboard
+      .text('🔄 Cek Status & Aktifkan Server', `check_prod_qris_${deposit.reff_id}_${product.id}`)
+      .row()
+      .text('❌ Batalkan Transaksi', `cancel_deposit_${deposit.reff_id}`)
+      .text('⬅️ Detail Produk', `prod_view_${product.id}`);
+
+    if (deposit.qr_image) {
+      try {
+        await ctx.replyWithPhoto(deposit.qr_image, {
+          caption: body,
+          parse_mode: 'Markdown',
+          reply_markup: keyboard,
+        });
+        return;
+      } catch (err) {
+        console.warn('Fallback to sendOrEdit for product QR image:', err);
+      }
+    }
+
+    await sendOrEdit(ctx, body, keyboard);
+  } catch (err: any) {
+    await ctx.reply(`❌ **Gagal Membuat Tagihan QRIS:** ${err.message}\n\nSilakan coba beberapa saat lagi.`);
+    await handleProductDetailView(ctx, productId);
+  }
+}
+
+export async function handleCheckProductQrisDeposit(ctx: Context, reffId: string, productId: string): Promise<void> {
+  const userId = ctx.from?.id || 0;
+  const product = await db.getProductById(productId);
+  if (!product) {
+    await ctx.reply('⚠️ Produk tidak ditemukan.');
+    return;
+  }
+
+  try {
+    const statusData = await flowixService.checkDeposit(reffId);
+    const existing = await db.getDepositByReffId(reffId);
+
+    if (statusData.status === 'success') {
+      if (existing && existing.status !== 'success') {
+        const paidAt = statusData.paid_at ? new Date(statusData.paid_at) : new Date();
+        await db.updateDepositStatus(reffId, 'success', paidAt);
+
+        await ctx.answerCallbackQuery({ text: '🎉 Pembayaran Diterima! Server sedang dibuat...', show_alert: true });
+        await AnimationManager.deploying(ctx, product.name);
+        const loading = await ctx.reply('⏳ **Sedang mendeploy server otomatis di Pterodactyl Panel...**', { parse_mode: 'Markdown' });
+
+        try {
+          const pteroData = await pterodactylService.getOrCreateUser(userId, ctx.from?.first_name || 'Customer', ctx.from?.username);
+          const pteroUser = pteroData.user;
+          const password = pteroData.generatedPassword;
+
+          const mockPackage = {
+            id: product.id,
+            category: product.category_id as any,
+            tier: 1,
+            name: product.name,
+            duration: '30d' as any,
+            durationLabel: product.duration_label,
+            durationDays: product.duration_days,
+            price: product.price,
+            ramMb: product.ram_mb,
+            cpuPercent: product.cpu_percent,
+            diskGb: product.disk_gb,
+            eggId: product.egg_id,
+            nestId: 1,
+            dockerImage: product.docker_image,
+            description: product.description,
+            badge: product.badge,
+          };
+
+          const serverResult = await pterodactylService.createServer(pteroUser.id, mockPackage, `${product.name} - ${ctx.from?.first_name || 'User'}`);
+          const expiresAt = new Date(Date.now() + product.duration_days * 24 * 60 * 60 * 1000);
+
+          await db.recordUserServer({
+            telegram_id: userId,
+            server_id: serverResult.serverId,
+            server_identifier: serverResult.serverIdentifier,
+            server_name: serverResult.name,
+            package_id: product.id,
+            duration_days: product.duration_days,
+            port: serverResult.port,
+            status: 'active',
+            expires_at: expiresAt,
+          });
+
+          await db.createOrder({
+            telegram_id: userId,
+            product_id: product.id,
+            product_name: product.name,
+            total_amount: product.price,
+            payment_method: 'QRIS_FLOWIX',
+            payment_status: 'PAID',
+            order_status: 'COMPLETED',
+            server_id: serverResult.serverId,
+          });
+
+          const successKeyboard = new InlineKeyboard()
+            .url('💻 BUKA PTERODACTYL PANEL', serverResult.panelUrl)
+            .row()
+            .text('🧩 Layanan Saya', 'nav_pub_my_services')
+            .text('🏠 Home', 'nav_pub_home');
+
+          const credsText = `🎉 **PEMBAYARAN QRIS SUKSES & SERVER BERHASIL AKTIF!**\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `📦 **Paket:** \`${product.name}\`\n` +
+            `⏱️ **Masa Aktif:** \`${product.duration_days} Hari\` (Exp: \`${expiresAt.toLocaleDateString('id-ID')}\`)\n` +
+            `🆔 **Server ID:** \`#${serverResult.serverId}\` (\`${serverResult.serverIdentifier}\`)\n` +
+            `🔌 **Alokasi Port:** \`${serverResult.port}\`\n` +
+            `🌐 **Node Host:** \`pteronode.rullzyestorepremium.my.id\`\n\n` +
+            `🔑 **KREDENSIAL LOGIN PTERODACTYL PANEL:**\n` +
+            `• 🌐 **URL Panel:** \`${serverResult.panelUrl}\`\n` +
+            `• 👤 **Username:** \`${pteroUser.username}\`\n` +
+            `• 📧 **Email:** \`${pteroUser.email}\`\n` +
+            `• 🔐 **Password:** \`${password}\`\n` +
+            `━━━━━━━━━━━━━━━━━━━━\n` +
+            `👉 **PANDUAN LOGIN:**\n` +
+            `1. Klik tombol **💻 BUKA PTERODACTYL PANEL** di bawah.\n` +
+            `2. Masukkan **Username** dan **Password** di atas.\n` +
+            `3. Server sudah siap 24 jam! Klik tombol **START** di tab Console untuk menjalankan bot/game.`;
+
+          try {
+            await ctx.api.editMessageText(ctx.chat!.id, loading.message_id, credsText, {
+              parse_mode: 'Markdown',
+              reply_markup: successKeyboard,
+            });
+          } catch {
+            await ctx.reply(credsText, { parse_mode: 'Markdown', reply_markup: successKeyboard });
+          }
+          return;
+        } catch (provErr: any) {
+          await db.addBalance(userId, product.price, `Kompensasi Saldo Server Error (${reffId})`);
+          await ctx.reply(`⚠️ Pembayaran QRIS berhasil, namun terjadi kendala saat auto-deploy: ${provErr.message}.\n\nSaldo senilai ${formatRupiah(product.price)} telah dimasukkan ke dompet akun Anda.`);
+          return;
+        }
+      } else {
+        await ctx.answerCallbackQuery({ text: '✅ Pesanan ini sudah berhasil diproses dan server telah aktif.', show_alert: true });
+        await handlePubMyServices(ctx);
+        return;
+      }
+    } else if (statusData.status === 'pending') {
+      await ctx.answerCallbackQuery({
+        text: '⏳ Pembayaran belum terdeteksi di Flowix. Silakan selesaikan scan QRIS di atas lalu klik cek status lagi.',
+        show_alert: true,
+      });
+    } else {
+      await db.updateDepositStatus(reffId, statusData.status);
+      await ctx.answerCallbackQuery({
+        text: `⚠️ Status transaksi: ${statusData.status.toUpperCase()}`,
+        show_alert: true,
+      });
+    }
+  } catch (err: any) {
+    await ctx.answerCallbackQuery({ text: `⚠️ Error cek status: ${err.message}`, show_alert: true });
   }
 }
 
@@ -1491,12 +1717,14 @@ export async function handleProductDetailView(ctx: Context, productId: string): 
     `💳 **Saldo Anda:** \`${formatRupiah(balance)}\``;
 
   const keyboard = new InlineKeyboard()
-    .text(`💰 Beli Pakai Saldo (${formatRupiah(product.price)})`, `buy_instant_balance_${product.id}`)
+    .text(`💳 Beli Langsung via QRIS (${formatRupiah(product.price)})`, `buy_instant_qris_${product.id}`)
+    .row()
+    .text(`💰 Beli Pakai Saldo Dompet`, `buy_instant_balance_${product.id}`)
     .row()
     .text('🛒 Masukkan ke Keranjang', `add_cart_${product.id}`)
     .text('❤️ Wishlist', `toggle_wish_${product.id}`)
     .row()
-    .url('💳 Bayar Instan via QRIS Otomatis', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Order via Website Store', `https://store.rullzyestorepremium.my.id/checkout?plan=${product.id}`)
     .row()
     .text('⬅️ Semua Produk', 'nav_pub_products')
     .text('🏠 Home', 'nav_pub_home');
@@ -1513,13 +1741,15 @@ export async function handleBuyProductWithBalance(ctx: Context, productId: strin
 
   if (!user || user.balance < product.price) {
     const keyboard = new InlineKeyboard()
-      .text('💳 Top Up Saldo', 'nav_pub_balance')
-      .url('📲 Bayar via QRIS Langsung', 'https://rullzyestorepremium.my.id')
+      .text('💳 Top Up Saldo Bot', 'nav_pub_balance')
+      .text('💳 Beli via QRIS Instan', `buy_instant_qris_${product.id}`)
       .row()
-      .text('⬅️ Kembali', `prod_view_${product.id}`);
+      .url('🌐 Beli di Website Store', `https://store.rullzyestorepremium.my.id/checkout?plan=${product.id}`)
+      .row()
+      .text('⬅️ Kembali ke Produk', `prod_view_${product.id}`);
 
     await ctx.reply(
-      `⚠️ **Saldo Tidak Mencukupi!**\n\nHarga Produk: \`${formatRupiah(product.price)}\`\nSaldo Anda: \`${formatRupiah(user?.balance || 0)}\`\n\nSilakan isi saldo Anda terlebih dahulu.`,
+      `⚠️ **Saldo Tidak Mencukupi!**\n\nHarga Produk: \`${formatRupiah(product.price)}\`\nSaldo Anda: \`${formatRupiah(user?.balance || 0)}\`\n\nAnda dapat membeli langsung menggunakan QRIS Instan atau mengisi saldo dompet Anda terlebih dahulu.`,
       { parse_mode: 'Markdown', reply_markup: keyboard }
     );
     return;

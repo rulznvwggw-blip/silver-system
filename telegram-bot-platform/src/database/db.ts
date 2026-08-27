@@ -314,6 +314,7 @@ sqlite.exec(`
     reff_id TEXT NOT NULL UNIQUE,
     pay_id TEXT,
     telegram_id INTEGER NOT NULL,
+    product_id TEXT,
     amount_request INTEGER NOT NULL,
     amount_total INTEGER NOT NULL,
     fee INTEGER NOT NULL DEFAULT 0,
@@ -327,6 +328,10 @@ sqlite.exec(`
     expired_at TEXT
   );
 `);
+
+try {
+  sqlite.exec('ALTER TABLE deposits ADD COLUMN product_id TEXT');
+} catch {}
 
 // 2. Initial Seeding of Admin, Categories, Products & Coupons
 const adminCheck = sqlite.prepare('SELECT telegram_id FROM admins WHERE telegram_id = ?').get(SUPER_ADMIN_ID);
@@ -694,6 +699,7 @@ export interface DepositModel {
   reff_id: string;
   pay_id?: string;
   telegram_id: number;
+  product_id?: string;
   amount_request: number;
   amount_total: number;
   fee: number;
@@ -1631,12 +1637,13 @@ export const db = {
   async createDepositRecord(data: Omit<DepositModel, 'id' | 'created_at'>): Promise<DepositModel> {
     const now = new Date().toISOString();
     const info = sqlite.prepare(`
-      INSERT INTO deposits (reff_id, pay_id, telegram_id, amount_request, amount_total, fee, method_code, status, qr_image, qr_string, pay_url, created_at, paid_at, expired_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO deposits (reff_id, pay_id, telegram_id, product_id, amount_request, amount_total, fee, method_code, status, qr_image, qr_string, pay_url, created_at, paid_at, expired_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       data.reff_id,
       data.pay_id || null,
       data.telegram_id,
+      data.product_id || null,
       data.amount_request,
       data.amount_total,
       data.fee || 0,
@@ -1665,6 +1672,7 @@ export const db = {
       reff_id: r.reff_id,
       pay_id: r.pay_id || undefined,
       telegram_id: r.telegram_id,
+      product_id: r.product_id || undefined,
       amount_request: r.amount_request,
       amount_total: r.amount_total,
       fee: r.fee,
@@ -1698,6 +1706,7 @@ export const db = {
       reff_id: r.reff_id,
       pay_id: r.pay_id || undefined,
       telegram_id: r.telegram_id,
+      product_id: r.product_id || undefined,
       amount_request: r.amount_request,
       amount_total: r.amount_total,
       fee: r.fee,
@@ -1719,6 +1728,7 @@ export const db = {
       reff_id: r.reff_id,
       pay_id: r.pay_id || undefined,
       telegram_id: r.telegram_id,
+      product_id: r.product_id || undefined,
       amount_request: r.amount_request,
       amount_total: r.amount_total,
       fee: r.fee,

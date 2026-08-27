@@ -270,6 +270,20 @@ export default function CustomerDashboard() {
                           </div>
                         </div>
 
+                        {/* Login Credentials Box */}
+                        <div className="bg-slate-950/90 p-3 rounded-xl border border-slate-800/80 space-y-1.5 text-xs font-mono">
+                          <div className="flex justify-between items-center text-[11px]">
+                            <span className="text-slate-400">Username:</span>
+                            <span className="text-white font-bold">{srv.username || srv.customerEmail.split('@')[0]}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-[11px]">
+                            <span className="text-slate-400">Password:</span>
+                            <span className="text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                              {srv.password || 'RullzyeStore!2026'}
+                            </span>
+                          </div>
+                        </div>
+
                         <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80 pt-4">
                           <div>
                             Kedaluwarsa: <strong className="text-slate-200">{formatDate(srv.expiresAt)}</strong>

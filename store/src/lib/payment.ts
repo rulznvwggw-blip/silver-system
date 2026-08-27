@@ -83,6 +83,8 @@ export class PaymentService {
         },
       });
 
+      const userPassword = (user as any).tempPassword || ('Rullzye_' + Math.random().toString(36).slice(-6) + '!1');
+
       serverData = {
         id: pteroServer.server.id,
         uuid: pteroServer.server.uuid,
@@ -93,6 +95,7 @@ export class PaymentService {
         port: pteroServer.allocation.port,
         panelUrl: pteroServer.panelUrl,
         username: user.username,
+        password: userPassword,
       };
 
       // Add to store
@@ -116,6 +119,8 @@ export class PaymentService {
         createdAt: paidAt,
         expiresAt,
         panelUrl: pteroServer.panelUrl,
+        username: user.username,
+        password: userPassword,
       });
 
       order.serverId = `srv-${pteroServer.server.id}`;
@@ -125,6 +130,9 @@ export class PaymentService {
       // Resilient fallback for offline API or demo instances
       const mockPort = 3000 + Math.floor(Math.random() * 50);
       const mockId = Math.floor(Math.random() * 900) + 100;
+      const fallbackPassword = 'Rullzye_' + Math.random().toString(36).slice(-6) + '!1';
+      const fallbackUsername = order.customer.username || order.customer.email.split('@')[0];
+
       serverData = {
         id: mockId,
         uuid: `uuid-${Date.now()}`,
@@ -134,7 +142,8 @@ export class PaymentService {
         ipAddress: 'pteronode.rullzyestorepremium.my.id',
         port: mockPort,
         panelUrl: 'https://ptero.rullzyestorepremium.my.id',
-        username: order.customer.username || order.customer.email.split('@')[0],
+        username: fallbackUsername,
+        password: fallbackPassword,
       };
 
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -157,6 +166,8 @@ export class PaymentService {
         createdAt: paidAt,
         expiresAt,
         panelUrl: serverData.panelUrl,
+        username: fallbackUsername,
+        password: fallbackPassword,
       });
 
       order.serverId = `srv-${mockId}`;

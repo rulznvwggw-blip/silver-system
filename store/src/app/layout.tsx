@@ -19,11 +19,11 @@ export const metadata: Metadata = {
     'hosting nodejs murah',
   ],
   authors: [{ name: 'RullzyeStore Indonesia' }],
-  metadataBase: new URL('https://ptero.rullzyestorepremium.my.id'),
+  metadataBase: new URL('https://store.rullzyestorepremium.my.id'),
   openGraph: {
     title: 'RullzyeStore - Cloud Hosting Bot & Minecraft Server Indonesia',
     description: 'Deploy Bot WhatsApp, Telegram, Minecraft Server & Custom Apps dalam hitungan detik. Anti-DDoS, NVMe SSD, Pterodactyl Panel.',
-    url: 'https://ptero.rullzyestorepremium.my.id',
+    url: 'https://store.rullzyestorepremium.my.id',
     siteName: 'RullzyeStore Hosting',
     locale: 'id_ID',
     type: 'website',

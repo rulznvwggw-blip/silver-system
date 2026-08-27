@@ -70,6 +70,8 @@ import {
   handlePubAbout,
   handlePubCategoryProducts,
   handlePubCreateFlowixDeposit,
+  handleBuyProductWithQris,
+  handleCheckProductQrisDeposit,
   handleCheckFlowixDeposit,
   handleCancelFlowixDeposit,
   handleProductDetailView,
@@ -348,6 +350,16 @@ export function createBot(): Bot<Context> {
   // Product View & Buy
   bot.callbackQuery(/^prod_view_(.+)$/, async (ctx) => {
     await handleProductDetailView(ctx, ctx.match[1]);
+  });
+
+  bot.callbackQuery(/^buy_instant_qris_(.+)$/, async (ctx) => {
+    await handleBuyProductWithQris(ctx, ctx.match[1]);
+  });
+
+  bot.callbackQuery(/^check_prod_qris_(.+)_(.+)$/, async (ctx) => {
+    const reffId = ctx.match[1];
+    const productId = ctx.match[2];
+    await handleCheckProductQrisDeposit(ctx, reffId, productId);
   });
 
   bot.callbackQuery(/^buy_instant_balance_(.+)$/, async (ctx) => {

@@ -251,31 +251,42 @@ function CheckoutContent() {
                       <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 text-center space-y-4">
                         <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-300">
                           <QrCode className="w-4 h-4 text-brand-400" />
-                          <span>SCAN QRIS DENGAN SEMUA E-WALLET / M-BANKING</span>
+                          <span>SCAN QRIS OTOMATIS (FLOWIX REALTIME GATEWAY)</span>
                         </div>
 
-                        {/* Simulated QR Code Canvas */}
-                        <div className="w-56 h-56 bg-white p-3 rounded-2xl mx-auto flex flex-col items-center justify-center shadow-lg relative">
-                          {/* QR Code graphic pattern */}
-                          <div className="w-full h-full border-4 border-slate-900 rounded-lg p-2 flex flex-col items-center justify-between">
-                            <div className="w-full flex justify-between">
-                              <div className="w-10 h-10 bg-slate-900 rounded-sm" />
-                              <div className="w-10 h-10 bg-slate-900 rounded-sm" />
-                            </div>
-                            <div className="text-[10px] font-black text-slate-900 text-center">
-                              RULLZYESTORE QRIS
-                              <br />
-                              <span className="font-mono text-[8px] text-slate-600">{currentOrder.orderNumber}</span>
-                            </div>
-                            <div className="w-full flex justify-between items-end">
-                              <div className="w-10 h-10 bg-slate-900 rounded-sm" />
-                              <div className="w-6 h-6 bg-brand-600 rounded-sm" />
-                            </div>
-                          </div>
+                        {/* Real QRIS Code Image */}
+                        <div className="bg-white p-4 rounded-2xl mx-auto w-fit shadow-xl flex flex-col items-center justify-center">
+                          <img
+                            src={
+                              currentOrder.qrImage ||
+                              (currentOrder.qrString
+                                ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(currentOrder.qrString)}`
+                                : 'https://flowix.web.id/assets/images/qris-logo.png')
+                            }
+                            alt="QRIS Flowix"
+                            className="w-56 h-56 object-contain rounded-lg"
+                          />
+                          <span className="text-[10px] font-bold text-slate-800 mt-2 font-mono">
+                            {currentOrder.flowixReffId || currentOrder.orderNumber}
+                          </span>
                         </div>
+
+                        {currentOrder.payUrl && (
+                          <div>
+                            <a
+                              href={currentOrder.payUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-brand-400 hover:text-brand-300 font-semibold underline"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              Buka Halaman Pembayaran Resmi Flowix
+                            </a>
+                          </div>
+                        )}
 
                         <p className="text-xs text-slate-400">
-                          Gunakan GoPay, OVO, DANA, ShopeePay, BCA Mobile, Livin Mandiri, atau aplikasi QRIS lainnya.
+                          Gunakan GoPay, OVO, DANA, ShopeePay, BCA Mobile, Livin Mandiri, BRImo, atau seluruh aplikasi QRIS.
                         </p>
                       </div>
                     ) : (
@@ -352,9 +363,33 @@ function CheckoutContent() {
                     <span className="text-slate-400">PORT ALOKASI:</span>
                     <span className="text-emerald-400 font-bold">{currentOrder.serverDetails?.port || 3001}</span>
                   </div>
-                  <div className="flex justify-between border-b border-slate-900 pb-2">
+                  <div className="flex justify-between items-center border-b border-slate-900 pb-2">
                     <span className="text-slate-400">USERNAME PANEL:</span>
-                    <span className="text-white font-bold">{currentOrder.serverDetails?.username || currentOrder.customer.email.split('@')[0]}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-bold">{currentOrder.serverDetails?.username || currentOrder.customer.email.split('@')[0]}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(currentOrder.serverDetails?.username || currentOrder.customer.email.split('@')[0])}
+                        className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                      >
+                        Salin
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                    <span className="text-slate-400">PASSWORD PANEL:</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-black bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/40">
+                        {currentOrder.serverDetails?.password || 'RullzyeStore!2026'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(currentOrder.serverDetails?.password || 'RullzyeStore!2026')}
+                        className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                      >
+                        Salin
+                      </button>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">PANEL URL:</span>
