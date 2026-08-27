@@ -107,8 +107,8 @@ export default function CustomerDashboard() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          customerEmail: 'admin_dc693d@local.host',
-          customerName: 'Super Admin',
+          customerEmail: servers[0]?.customerEmail || orders[0]?.customer?.email || 'customer@rullzyestorepremium.my.id',
+          customerName: servers[0]?.username || orders[0]?.customer?.name || 'Customer Member',
           subject: newTicketSubject,
           category: newTicketCategory,
           message: newTicketMessage,
@@ -140,7 +140,7 @@ export default function CustomerDashboard() {
         body: JSON.stringify({
           ticketId: activeTicket.id,
           sender: 'customer',
-          senderName: 'Super Admin',
+          senderName: servers[0]?.username || orders[0]?.customer?.name || 'Customer',
           message: replyMessage,
         }),
       });
@@ -192,14 +192,14 @@ export default function CustomerDashboard() {
                   RullzyeStore Client Portal
                 </h1>
                 <span className="text-[11px] font-black uppercase tracking-wider bg-[#d97736]/20 text-[#f59e0b] px-3 py-0.5 rounded-full border border-[#d97736]/40 shadow-sm">
-                  👑 VIP PRO
+                  ⚡ CLIENT DASHBOARD
                 </span>
               </div>
               <p className="text-xs text-[#bfa995] mt-0.5 flex items-center gap-2">
-                <span>Akun Terverifikasi:</span>
-                <strong className="text-[#fdfbf7]">admin_dc693d@local.host</strong>
+                <span>Akun Anda:</span>
+                <strong className="text-[#fdfbf7]">{servers[0]?.customerEmail || (orders[0]?.customer?.email) || 'client@rullzyestorepremium.my.id'}</strong>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-                <span className="text-[#10b981] font-semibold text-[11px]">Online</span>
+                <span className="text-[#10b981] font-semibold text-[11px]">Terhubung</span>
               </p>
             </div>
           </div>

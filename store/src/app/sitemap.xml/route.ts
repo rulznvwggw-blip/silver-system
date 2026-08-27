@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 
 export async function GET() {
-  const baseUrl = 'https://ptero.rullzyestorepremium.my.id';
+  const baseUrl = 'https://store.rullzyestorepremium.my.id';
   const posts = store.getBlogPosts();
 
   const staticUrls = [

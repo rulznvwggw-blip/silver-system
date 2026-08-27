@@ -124,14 +124,9 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-white transition-colors">
-                  Tentang RullzyeStore
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="hover:text-slate-200 transition-colors text-xs text-slate-500">
-                  Staff Admin Access
-                </Link>
+                <a href="https://ptero.rullzyestorepremium.my.id" target="_blank" rel="noopener noreferrer" className="hover:text-brand-400 transition-colors text-xs text-slate-400 flex items-center gap-1">
+                  Pterodactyl Web Panel ↗
+                </a>
               </li>
             </ul>
           </div>
