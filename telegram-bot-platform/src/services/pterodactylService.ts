@@ -7,8 +7,6 @@ import { db } from '../database/db.js';
 
 const execAsync = promisify(exec);
 
-const PTERO_API_URL = 'http://localhost:8080/api/application';
-const PTERO_API_KEY = 'AdgM9Jbg92evbI3mcSdQ1Jm89fge8N8vUFnTXS4kUgRGiOG9';
 const PUBLIC_NODE_DOMAIN = 'pteronode.rullzyestorepremium.my.id';
 const PUBLIC_PANEL_URL = 'https://ptero.rullzyestorepremium.my.id';
 
@@ -33,7 +31,7 @@ export interface ProvisionResult {
 export async function seedServerStarterFiles(uuid: string, category: string, port: number): Promise<void> {
   const volPath = `/var/lib/pterodactyl/volumes/${uuid}`;
   try {
-    await fs.mkdir(volPath, { recursive: true });
+    await execAsync(`sudo mkdir -p ${volPath} && sudo chmod 777 ${volPath}`);
 
     if (category === 'whatsapp') {
       const packageJson = {
@@ -123,53 +121,74 @@ PANDUAN MENJALANKAN BOT:
       await fs.writeFile(path.join(volPath, 'README.txt'), readme);
       await fs.writeFile(path.join(volPath, '.env'), 'BOT_NAME="Rullzye WhatsApp Bot"\nPREFIX="."\n');
 
+      // Copy pre-installed node_modules for instant 0-second execution
+      try {
+        await execAsync(`sudo cp -r /var/lib/pterodactyl/templates/whatsapp/node_modules ${volPath}/node_modules`);
+      } catch (e: any) {
+        console.warn('[WA NODE_MODULES COPY WARNING]', e.message);
+      }
+
     } else if (category === 'telegram') {
       const mainPy = `import os
 import sys
-import logging
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
+import time
+import json
+import urllib.request
+import urllib.parse
 
 TOKEN = os.getenv("BOT_TOKEN", "").strip()
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "👋 Halo! Bot Telegram Anda aktif 24 jam di RullzyeStore Cloud 🚀\\n\\n"
-        "Perintah tersedia:\\n"
-        "/start - Menampilkan pesan ini\\n"
-        "/ping - Cek status bot"
-    )
-
-async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🏓 Pong! Server RullzyeStore Cloud Online 💚")
+def send_message(chat_id, text):
+    try:
+        url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+        data = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode('utf-8')
+        req = urllib.request.Request(url, data=data)
+        urllib.request.urlopen(req, timeout=10)
+    except Exception as e:
+        print(f"Failed to send message: {e}")
 
 def main():
     print("====================================================")
-    print("🚀 [RULLZYESTORE CLOUD] MEMULAI BOT TELEGRAM...")
-    print("🌐 Node: ${PUBLIC_NODE_DOMAIN} | Port: ${port}")
+    print("🚀 [RULLZYESTORE CLOUD] BOT TELEGRAM SIAP PAKAI")
+    print(f"🌐 Node: ${PUBLIC_NODE_DOMAIN} | Port: ${port}")
     print("====================================================\\n")
-    if not TOKEN or TOKEN == "ISI_TOKEN_BOT_DI_TAB_STARTUP":
-        print("⚠️ PERINGATAN: BOT_TOKEN belum diisi!")
-        print("👉 Silakan buka tab 'Startup' di panel kiri atau edit file '.env' dan masukkan Token Bot Telegram dari @BotFather.")
-        print("Kemudian klik tombol 'Restart' di pojok kanan atas.")
+
+    if not TOKEN or len(TOKEN) < 20 or TOKEN == "ISI_TOKEN_BOT_DI_TAB_STARTUP":
+        print("⚠️ STATUS: Menunggu konfigurasi BOT_TOKEN.")
+        print("👉 Silakan buka tab 'Startup' di panel kiri, masukkan Token Bot Telegram dari @BotFather ke kolom 'BOT_TOKEN', lalu klik 'Restart'!")
+        print("⏳ Server tetap aktif menjaga container online 24 jam nonstop...")
+        while True:
+            time.sleep(30)
         return
 
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("ping", ping))
-    print("✅ Bot Telegram siap menerima perintah!")
-    app.run_polling()
+    print("✅ Bot Telegram terhubung & aktif mendengarkan pesan 24 jam nonstop!")
+    offset = 0
+    while True:
+        try:
+            url = f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset={offset}&timeout=20"
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=25) as response:
+                res = json.loads(response.read().decode('utf-8'))
+                if res.get("ok"):
+                    for update in res.get("result", []):
+                        offset = update["update_id"] + 1
+                        msg = update.get("message", {})
+                        text = msg.get("text", "")
+                        chat_id = msg.get("chat", {}).get("id")
+                        if not chat_id:
+                            continue
+                        if text.startswith("/start"):
+                            send_message(chat_id, "👋 Halo! Bot Telegram Anda aktif 24 jam di RullzyeStore Cloud 🚀\\n\\nPerintah:\\n/ping - Cek status bot\\n/help - Bantuan")
+                        elif text.startswith("/ping"):
+                            send_message(chat_id, "🏓 Pong! Server RullzyeStore Cloud Online 💚")
+        except Exception as e:
+            time.sleep(5)
 
 if __name__ == '__main__':
     main()
 `;
 
-      const reqs = `python-telegram-bot>=20.0\nrequests\npython-dotenv\n`;
+      const reqs = `requests\npython-dotenv\n`;
       const readme = `=========================================================
 🚀 RULLZYE STORE CLOUD - TELEGRAM BOT SIAP PAKAI
 =========================================================
@@ -223,6 +242,13 @@ PANDUAN MENJALANKAN SERVER:
       await fs.writeFile(path.join(volPath, 'eula.txt'), 'eula=true\n');
       await fs.writeFile(path.join(volPath, 'server.properties'), serverProps);
       await fs.writeFile(path.join(volPath, 'README.txt'), readme);
+
+      // Copy master Purpur/Paper server.jar template directly
+      try {
+        await execAsync(`sudo cp /var/lib/pterodactyl/templates/minecraft/server.jar ${volPath}/server.jar`);
+      } catch (e: any) {
+        console.warn('[MINECRAFT JAR COPY WARNING]', e.message);
+      }
     }
 
     // Set ownership to pterodactyl daemon user (999:984)
@@ -303,7 +329,7 @@ export const pterodactylService = {
 
     let eggId = pkg.eggId || 15;
     let image = pkg.dockerImage || 'ghcr.io/parkervcp/yolks:nodejs_20';
-    let startup = 'if [[ -d .git ]] && [[ "{{AUTO_UPDATE}}" == "1" ]]; then git pull; fi; if [[ ! -d node_modules ]] || [[ "{{REINSTALL_NODE_MODULES}}" == "1" ]]; then npm install --production; fi; node {{MAIN_FILE}}';
+    let startup = 'node {{MAIN_FILE}}';
 
     if (pkg.category === 'minecraft') {
       eggId = 2;
@@ -312,7 +338,7 @@ export const pterodactylService = {
     } else if (pkg.category === 'telegram') {
       eggId = 16;
       image = 'ghcr.io/parkervcp/yolks:python_3.11';
-      startup = 'if [[ -f package.json ]]; then if [[ ! -d node_modules ]]; then npm install; fi; node {{BOT_START_FILE}}; elif [[ -f requirements.txt ]]; then pip install -r requirements.txt; python3 {{BOT_START_FILE}}; else python3 {{BOT_START_FILE}}; fi';
+      startup = 'python3 {{BOT_START_FILE}}';
     }
 
     const phpCode = `
@@ -379,6 +405,13 @@ export const pterodactylService = {
         ]);
       }
 
+      // Register server in Wings memory so it can be managed immediately
+      try {
+        app(Pterodactyl\\Repositories\\Wings\\DaemonServerRepository::class)->setServer($server)->create(false);
+      } catch (\\Throwable \$e) {
+        // Fallback
+      }
+
       echo json_encode([
         'serverId' => $server->id,
         'serverIdentifier' => $server->uuidShort,
@@ -398,7 +431,7 @@ export const pterodactylService = {
       const { stdout } = await execAsync(cmd);
       const res = JSON.parse(stdout.trim());
 
-      // Auto-Seed starter files so the server is SIAP PAKAI (READY TO USE) immediately!
+      // Auto-Seed starter files (including server.jar for Minecraft) so the server is SIAP PAKAI immediately!
       if (res.uuid) {
         await seedServerStarterFiles(res.uuid, pkg.category, res.port);
       }
