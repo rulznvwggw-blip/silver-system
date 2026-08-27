@@ -308,6 +308,24 @@ sqlite.exec(`
     response TEXT NOT NULL,
     created_at TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS deposits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reff_id TEXT NOT NULL UNIQUE,
+    pay_id TEXT,
+    telegram_id INTEGER NOT NULL,
+    amount_request INTEGER NOT NULL,
+    amount_total INTEGER NOT NULL,
+    fee INTEGER NOT NULL DEFAULT 0,
+    method_code TEXT NOT NULL DEFAULT 'QRIS',
+    status TEXT NOT NULL DEFAULT 'pending',
+    qr_image TEXT,
+    qr_string TEXT,
+    pay_url TEXT,
+    created_at TEXT NOT NULL,
+    paid_at TEXT,
+    expired_at TEXT
+  );
 `);
 
 // 2. Initial Seeding of Admin, Categories, Products & Coupons
@@ -669,6 +687,24 @@ export interface ModerationLogModel {
   reason: string;
   detected_content?: string;
   created_at: Date;
+}
+
+export interface DepositModel {
+  id?: number;
+  reff_id: string;
+  pay_id?: string;
+  telegram_id: number;
+  amount_request: number;
+  amount_total: number;
+  fee: number;
+  method_code: string;
+  status: string;
+  qr_image?: string;
+  qr_string?: string;
+  pay_url?: string;
+  created_at: Date;
+  paid_at?: Date;
+  expired_at?: Date;
 }
 
 // 4. DB Controller & Methods
@@ -1589,6 +1625,112 @@ export const db = {
   async setSetting(key: string, value: any): Promise<void> {
     const val = typeof value === 'string' ? value : JSON.stringify(value);
     sqlite.prepare('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?').run(key, val, val);
+  },
+
+  // --- FLOWIX DEPOSITS & PAYMENTS ---
+  async createDepositRecord(data: Omit<DepositModel, 'id' | 'created_at'>): Promise<DepositModel> {
+    const now = new Date().toISOString();
+    const info = sqlite.prepare(`
+      INSERT INTO deposits (reff_id, pay_id, telegram_id, amount_request, amount_total, fee, method_code, status, qr_image, qr_string, pay_url, created_at, paid_at, expired_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      data.reff_id,
+      data.pay_id || null,
+      data.telegram_id,
+      data.amount_request,
+      data.amount_total,
+      data.fee || 0,
+      data.method_code || 'QRIS',
+      data.status || 'pending',
+      data.qr_image || null,
+      data.qr_string || null,
+      data.pay_url || null,
+      now,
+      data.paid_at ? data.paid_at.toISOString() : null,
+      data.expired_at ? data.expired_at.toISOString() : null
+    );
+
+    return {
+      ...data,
+      id: Number(info.lastInsertRowid),
+      created_at: new Date(now),
+    };
+  },
+
+  async getDepositByReffId(reffId: string): Promise<DepositModel | undefined> {
+    const r = sqlite.prepare('SELECT * FROM deposits WHERE reff_id = ?').get(reffId) as any;
+    if (!r) return undefined;
+    return {
+      id: r.id,
+      reff_id: r.reff_id,
+      pay_id: r.pay_id || undefined,
+      telegram_id: r.telegram_id,
+      amount_request: r.amount_request,
+      amount_total: r.amount_total,
+      fee: r.fee,
+      method_code: r.method_code,
+      status: r.status,
+      qr_image: r.qr_image || undefined,
+      qr_string: r.qr_string || undefined,
+      pay_url: r.pay_url || undefined,
+      created_at: new Date(r.created_at),
+      paid_at: r.paid_at ? new Date(r.paid_at) : undefined,
+      expired_at: r.expired_at ? new Date(r.expired_at) : undefined,
+    };
+  },
+
+  async updateDepositStatus(reffId: string, status: string, paidAt?: Date): Promise<void> {
+    if (paidAt) {
+      sqlite.prepare('UPDATE deposits SET status = ?, paid_at = ? WHERE reff_id = ?').run(
+        status,
+        paidAt.toISOString(),
+        reffId
+      );
+    } else {
+      sqlite.prepare('UPDATE deposits SET status = ? WHERE reff_id = ?').run(status, reffId);
+    }
+  },
+
+  async getUserDeposits(telegramId: number, limit = 10): Promise<DepositModel[]> {
+    const rows = sqlite.prepare('SELECT * FROM deposits WHERE telegram_id = ? ORDER BY id DESC LIMIT ?').all(telegramId, limit) as any[];
+    return rows.map(r => ({
+      id: r.id,
+      reff_id: r.reff_id,
+      pay_id: r.pay_id || undefined,
+      telegram_id: r.telegram_id,
+      amount_request: r.amount_request,
+      amount_total: r.amount_total,
+      fee: r.fee,
+      method_code: r.method_code,
+      status: r.status,
+      qr_image: r.qr_image || undefined,
+      qr_string: r.qr_string || undefined,
+      pay_url: r.pay_url || undefined,
+      created_at: new Date(r.created_at),
+      paid_at: r.paid_at ? new Date(r.paid_at) : undefined,
+      expired_at: r.expired_at ? new Date(r.expired_at) : undefined,
+    }));
+  },
+
+  async getAllDeposits(limit = 30): Promise<DepositModel[]> {
+    const rows = sqlite.prepare('SELECT * FROM deposits ORDER BY id DESC LIMIT ?').all(limit) as any[];
+    return rows.map(r => ({
+      id: r.id,
+      reff_id: r.reff_id,
+      pay_id: r.pay_id || undefined,
+      telegram_id: r.telegram_id,
+      amount_request: r.amount_request,
+      amount_total: r.amount_total,
+      fee: r.fee,
+      method_code: r.method_code,
+      status: r.status,
+      qr_image: r.qr_image || undefined,
+      qr_string: r.qr_string || undefined,
+      pay_url: r.pay_url || undefined,
+      created_at: new Date(r.created_at),
+      paid_at: r.paid_at ? new Date(r.paid_at) : undefined,
+      expired_at: r.expired_at ? new Date(r.expired_at) : undefined,
+    }));
   },
 
   // --- ADMIN SECURITY & AUDIT ---

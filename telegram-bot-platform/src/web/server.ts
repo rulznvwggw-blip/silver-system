@@ -120,5 +120,37 @@ export function createWebServer(): express.Express {
     res.json({ success: true, key, value: updated });
   });
 
+  // 6. Flowix Webhook Callback Handler
+  app.post('/api/webhook/flowix', async (req, res) => {
+    try {
+      const { event, data } = req.body || {};
+      console.log(`[FLOWIX WEBHOOK] Received event: ${event}`, data);
+
+      if (event === 'deposit.status' && data?.reff_id) {
+        const deposit = await db.getDepositByReffId(data.reff_id);
+        if (deposit) {
+          if (data.status === 'success' && deposit.status !== 'success') {
+            await db.updateDepositStatus(data.reff_id, 'success', new Date());
+            const creditedAmount = data.amount || deposit.amount_request;
+            await db.addBalance(deposit.telegram_id, creditedAmount, `Top Up Flowix QRIS (${data.reff_id})`);
+            await db.createNotification(
+              deposit.telegram_id,
+              '🎉 Top Up Saldo Berhasil!',
+              `Pembayaran QRIS ${data.reff_id} sebesar Rp ${creditedAmount.toLocaleString('id-ID')} telah berhasil diverifikasi dan saldo telah ditambahkan.`
+            );
+            console.log(`[FLOWIX WEBHOOK] Credited Rp ${creditedAmount} to User ${deposit.telegram_id}`);
+          } else if (data.status === 'failed' || data.status === 'expired' || data.status === 'canceled') {
+            await db.updateDepositStatus(data.reff_id, data.status);
+          }
+        }
+      }
+
+      res.status(200).json({ success: true, received: true });
+    } catch (err: any) {
+      console.error('[FLOWIX WEBHOOK ERROR]', err);
+      res.status(200).json({ success: false, error: err.message });
+    }
+  });
+
   return app;
 }

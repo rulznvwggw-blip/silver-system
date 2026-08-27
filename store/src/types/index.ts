@@ -81,6 +81,9 @@ export interface Order {
   paymentStatus: PaymentStatus;
   paymentRef?: string;
   qrString?: string;
+  qrImage?: string;
+  payUrl?: string;
+  flowixReffId?: string;
   vaNumber?: string;
   amount: number;
   createdAt: string;

@@ -3,6 +3,7 @@ import { db, ProductModel } from '../../database/db.js';
 import { getDynamicGreeting, createCozyHeader, formatRupiah } from '../../utils/ui.js';
 import { AnimationManager } from '../animations/animationManager.js';
 import { pterodactylService } from '../../services/pterodactylService.js';
+import { flowixService } from '../../services/flowixService.js';
 import { CommunityType } from '../../config/constants.js';
 
 export async function sendOrEdit(ctx: Context, text: string, keyboard: InlineKeyboard): Promise<void> {
@@ -993,28 +994,165 @@ export async function handlePubBalance(ctx: Context): Promise<void> {
   const userId = ctx.from?.id || 0;
   const user = await db.getUser(userId);
   const balance = user?.balance || 0;
+  const recentDeps = await db.getUserDeposits(userId, 3);
 
-  const header = createCozyHeader('💰 DOMPET SALDO AKUN', 'Saldo & Riwayat Transaksi');
-  const body = `${header}\n\n` +
+  const header = createCozyHeader('💰 DOMPET SALDO AKUN', 'Saldo & Top Up Otomatis via Flowix');
+  let body = `${header}\n\n` +
     `💵 **Saldo Anda Saat Ini:** \`${formatRupiah(balance)}\`\n\n` +
-    `Saldo dapat digunakan kapan saja untuk:\n` +
-    `• Beli / Sewa server bot & Minecraft instan\n` +
-    `• Perpanjang masa aktif server otomatis\n\n` +
-    `Pilih nominal Top Up otomatis via QRIS di bawah ini:`;
+    `⚡ **Metode Top Up:** \`QRIS Otomatis Realtime (Flowix Gateway)\`\n` +
+    `💳 **Dukungan:** Seluruh Bank (BCA, BRI, BNI, Mandiri) & E-Wallet (Dana, GoPay, OVO, ShopeePay)\n\n` +
+    `Pilih nominal Top Up instan di bawah ini:`;
+
+  if (recentDeps.length > 0) {
+    body += `\n\n━━━━━━━━━━━━━━━━━━━━\n🕒 **Riwayat Top Up Terakhir:**\n`;
+    recentDeps.forEach(d => {
+      const icon = d.status === 'success' ? '✅' : d.status === 'pending' ? '⏳' : '❌';
+      body += `${icon} \`${d.reff_id}\` — \`${formatRupiah(d.amount_request)}\` (${d.status.toUpperCase()})\n`;
+    });
+  }
 
   const keyboard = new InlineKeyboard()
-    .text('➕ Top Up Rp 5.000', 'topup_nominal_5000')
-    .text('➕ Top Up Rp 10.000', 'topup_nominal_10000')
+    .text('➕ Rp 2.000', 'topup_nominal_2000')
+    .text('➕ Rp 5.000', 'topup_nominal_5000')
+    .text('➕ Rp 10.000', 'topup_nominal_10000')
     .row()
-    .text('➕ Top Up Rp 25.000', 'topup_nominal_25000')
-    .text('➕ Top Up Rp 50.000', 'topup_nominal_50000')
+    .text('➕ Rp 25.000', 'topup_nominal_25000')
+    .text('➕ Rp 50.000', 'topup_nominal_50000')
+    .text('➕ Rp 100.000', 'topup_nominal_100000')
     .row()
-    .url('📲 Top Up Instan di Web', 'https://rullzyestorepremium.my.id')
+    .url('🌐 Top Up di Website', 'https://rullzyestorepremium.my.id')
     .row()
     .text('⬅️ Profil', 'nav_pub_profile')
     .text('🏠 Home', 'nav_pub_home');
 
   await sendOrEdit(ctx, body, keyboard);
+}
+
+export async function handlePubCreateFlowixDeposit(ctx: Context, amount: number, methodCode = 'QRIS'): Promise<void> {
+  const userId = ctx.from?.id || 0;
+  await AnimationManager.processing(ctx, `Membuat tagihan QRIS ${formatRupiah(amount)}`);
+
+  try {
+    const deposit = await flowixService.createDeposit({
+      amount,
+      method_code: methodCode,
+      fee_by_customer: true,
+    });
+
+    const expiredAt = deposit.expired_at ? new Date(deposit.expired_at) : new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    // Save record to DB
+    await db.createDepositRecord({
+      reff_id: deposit.reff_id,
+      pay_id: deposit.pay_id,
+      telegram_id: userId,
+      amount_request: deposit.amount_request,
+      amount_total: deposit.amount_total,
+      fee: deposit.fee || 0,
+      method_code: deposit.method_code,
+      status: deposit.status || 'pending',
+      qr_image: deposit.qr_image,
+      qr_string: deposit.qr_string,
+      pay_url: deposit.pay_url,
+      expired_at: expiredAt,
+    });
+
+    const header = createCozyHeader('🧾 TAGIHAN TOP UP QRIS (FLOWIX)', 'Scan QRIS untuk Menyelesaikan Pembayaran');
+    const body = `${header}\n\n` +
+      `🆔 **Reff ID:** \`${deposit.reff_id}\`\n` +
+      `💰 **Nominal Saldo:** \`${formatRupiah(deposit.amount_request)}\`\n` +
+      `🏷️ **Biaya Admin:** \`${formatRupiah(deposit.fee || 0)}\`\n` +
+      `💵 **Total Tagihan:** \`${formatRupiah(deposit.amount_total)}\`\n` +
+      `💳 **Metode:** \`${deposit.method_name || deposit.method_code}\`\n` +
+      `⏳ **Status:** \`PENDING (Menunggu Pembayaran)\`\n` +
+      `⏱️ **Batas Waktu:** \`${expiredAt.toLocaleString('id-ID')}\`\n\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `👉 **PANDUAN PEMBAYARAN:**\n` +
+      `1. Klik tombol **🌐 Buka Halaman Bayar** di bawah ATAU gunakan QRIS.\n` +
+      `2. Buka aplikasi BCA / Dana / GoPay / OVO / ShopeePay / Banking Anda.\n` +
+      `3. Scan kode QR dan selesaikan pembayaran sesuai total tagihan.\n` +
+      `4. Setelah berhasil membayar, klik tombol **🔄 Cek Status Pembayaran** di bawah!`;
+
+    const keyboard = new InlineKeyboard();
+    if (deposit.pay_url) {
+      keyboard.url('🌐 Buka Halaman Bayar & QRIS', deposit.pay_url).row();
+    }
+    keyboard
+      .text('🔄 Cek Status Pembayaran', `check_deposit_${deposit.reff_id}`)
+      .row()
+      .text('❌ Batalkan Tagihan', `cancel_deposit_${deposit.reff_id}`)
+      .text('💰 Dompet Saldo', 'nav_pub_balance');
+
+    await sendOrEdit(ctx, body, keyboard);
+  } catch (err: any) {
+    await ctx.reply(`❌ **Gagal Membuat Deposit Flowix:** ${err.message}\n\nSilakan coba beberapa saat lagi.`);
+    await handlePubBalance(ctx);
+  }
+}
+
+export async function handleCheckFlowixDeposit(ctx: Context, reffId: string): Promise<void> {
+  const userId = ctx.from?.id || 0;
+
+  try {
+    const statusData = await flowixService.checkDeposit(reffId);
+    const existing = await db.getDepositByReffId(reffId);
+
+    if (statusData.status === 'success') {
+      if (existing && existing.status !== 'success') {
+        const paidAt = statusData.paid_at ? new Date(statusData.paid_at) : new Date();
+        await db.updateDepositStatus(reffId, 'success', paidAt);
+        const newBalance = await db.addBalance(userId, statusData.amount_request, `Top Up Flowix QRIS (${reffId})`);
+
+        await ctx.answerCallbackQuery({ text: `🎉 Pembayaran Diterima! Saldo Anda sekarang ${formatRupiah(newBalance)}`, show_alert: true });
+
+        const header = createCozyHeader('🎉 TOP UP SALDO BERHASIL!', 'Pembayaran Telah Diverifikasi');
+        const body = `${header}\n\n` +
+          `✅ **Status Transaksi:** \`LUNAS / SUKSES 💚\`\n` +
+          `🆔 **Reff ID:** \`${reffId}\`\n` +
+          `💰 **Nominal Saldo Masuk:** \`${formatRupiah(statusData.amount_request)}\`\n` +
+          `💳 **Saldo Anda Sekarang:** \`${formatRupiah(newBalance)}\`\n\n` +
+          `Terima kasih! Saldo Anda sudah siap digunakan untuk sewa server dan bot instan.`;
+
+        const keyboard = new InlineKeyboard()
+          .text('🛍️ Belanja di Store', 'nav_pub_products')
+          .text('💰 Cek Saldo', 'nav_pub_balance')
+          .row()
+          .text('🏠 Home', 'nav_pub_home');
+
+        await sendOrEdit(ctx, body, keyboard);
+        return;
+      } else {
+        await ctx.answerCallbackQuery({ text: '✅ Saldo dari tagihan ini sudah masuk ke dompet Anda.', show_alert: true });
+        await handlePubBalance(ctx);
+        return;
+      }
+    } else if (statusData.status === 'pending') {
+      await ctx.answerCallbackQuery({
+        text: '⏳ Pembayaran belum terdeteksi. Silakan selesaikan scan QRIS dan klik cek lagi setelah transfer.',
+        show_alert: true,
+      });
+    } else {
+      await db.updateDepositStatus(reffId, statusData.status);
+      await ctx.answerCallbackQuery({
+        text: `⚠️ Status transaksi: ${statusData.status.toUpperCase()}`,
+        show_alert: true,
+      });
+      await handlePubBalance(ctx);
+    }
+  } catch (err: any) {
+    await ctx.answerCallbackQuery({ text: `⚠️ Error cek status: ${err.message}`, show_alert: true });
+  }
+}
+
+export async function handleCancelFlowixDeposit(ctx: Context, reffId: string): Promise<void> {
+  try {
+    await flowixService.cancelDeposit(reffId);
+    await db.updateDepositStatus(reffId, 'canceled');
+    await ctx.answerCallbackQuery({ text: '❌ Tagihan deposit berhasil dibatalkan.', show_alert: true });
+    await handlePubBalance(ctx);
+  } catch (err: any) {
+    await ctx.answerCallbackQuery({ text: `⚠️ Gagal membatalkan: ${err.message}`, show_alert: true });
+  }
 }
 
 export async function handlePubMyCoupons(ctx: Context): Promise<void> {

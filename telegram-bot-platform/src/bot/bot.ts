@@ -69,6 +69,9 @@ import {
   handlePubTerms,
   handlePubAbout,
   handlePubCategoryProducts,
+  handlePubCreateFlowixDeposit,
+  handleCheckFlowixDeposit,
+  handleCancelFlowixDeposit,
   handleProductDetailView,
   handleBuyProductWithBalance,
 } from './handlers/platformPublic.js';
@@ -391,13 +394,20 @@ export function createBot(): Bot<Context> {
     await ctx.answerCallbackQuery({ text: isAdded ? '❤️ Ditambahkan ke Wishlist!' : '💔 Dihapus dari Wishlist', show_alert: false });
   });
 
-  // Top Up Nominals
+  // Flowix Top Up & Payment Callbacks
   bot.callbackQuery(/^topup_nominal_(\d+)$/, async (ctx) => {
     const amount = parseInt(ctx.match[1], 10);
-    const userId = ctx.from?.id || 0;
-    await db.addBalance(userId, amount, `Top Up Saldo ${formatRupiah(amount)}`);
-    await ctx.answerCallbackQuery({ text: `✅ Berhasil top up ${formatRupiah(amount)}!`, show_alert: true });
-    await handlePubBalance(ctx);
+    await handlePubCreateFlowixDeposit(ctx, amount, 'QRIS');
+  });
+
+  bot.callbackQuery(/^check_deposit_(.+)$/, async (ctx) => {
+    const reffId = ctx.match[1];
+    await handleCheckFlowixDeposit(ctx, reffId);
+  });
+
+  bot.callbackQuery(/^cancel_deposit_(.+)$/, async (ctx) => {
+    const reffId = ctx.match[1];
+    await handleCancelFlowixDeposit(ctx, reffId);
   });
 
   // Ticket creation categories

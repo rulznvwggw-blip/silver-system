@@ -15,6 +15,9 @@ export interface AppConfig {
   webPort: number;
   autoBroadcastMinutes: number;
   isMockMode: boolean;
+  flowixApiKey: string;
+  flowixMerchantId: string;
+  flowixBaseUrl: string;
 }
 
 export const env: AppConfig = {
@@ -29,4 +32,7 @@ export const env: AppConfig = {
   webPort: parseInt(process.env.WEB_PORT || '3005', 10),
   autoBroadcastMinutes: parseInt(process.env.AUTO_BROADCAST_MINUTES || '30', 10),
   isMockMode: !process.env.BOT_TOKEN,
+  flowixApiKey: process.env.FLOWIX_API_KEY || 'sk-e4205e73-1eebcf3dab17-55fb83b7b4ad',
+  flowixMerchantId: process.env.FLOWIX_MERCHANT_ID || 'MID-FAR3217',
+  flowixBaseUrl: process.env.FLOWIX_BASE_URL || 'https://flowix.web.id/api/v1',
 };

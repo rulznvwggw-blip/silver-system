@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { store } from '@/lib/store';
 import { PaymentService } from '@/lib/payment';
+import { FlowixStoreService } from '@/lib/flowix';
 import { generateOrderNumber } from '@/lib/utils';
 import { PRODUCT_PLANS } from '@/data/products';
 import { Order, PaymentMethod, BillingCycle } from '@/types';
@@ -64,7 +65,13 @@ export async function POST(req: Request) {
     const orderNumber = generateOrderNumber();
     const orderId = `ord-${Date.now()}`;
 
-    // Payment details (QRIS string / VA number)
+    // Flowix QRIS Integration
+    let flowixDeposit = null;
+    if (paymentMethod === 'qris' && finalAmount >= 100) {
+      flowixDeposit = await FlowixStoreService.createDeposit(finalAmount, 'QRIS');
+    }
+
+    // Payment details (Fallback QRIS string / VA number)
     const paymentDetails = PaymentService.createPaymentDetails(paymentMethod as PaymentMethod, orderNumber, finalAmount);
 
     const newOrder: Order = {
@@ -91,9 +98,12 @@ export async function POST(req: Request) {
       couponCode,
       paymentMethod: paymentMethod as PaymentMethod,
       paymentStatus: 'pending',
-      amount: finalAmount,
+      amount: flowixDeposit?.amount_total || finalAmount,
       createdAt: new Date().toISOString(),
-      qrString: paymentDetails.qrString,
+      flowixReffId: flowixDeposit?.reff_id,
+      qrString: flowixDeposit?.qr_string || paymentDetails.qrString,
+      qrImage: flowixDeposit?.qr_image,
+      payUrl: flowixDeposit?.pay_url,
       vaNumber: paymentDetails.vaNumber,
     };
 
