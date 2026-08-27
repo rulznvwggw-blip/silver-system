@@ -122,7 +122,6 @@ Pilih kategori server yang ingin Anda sewa:
 • 🟢 **Bot WhatsApp:** Optimal untuk Baileys / WhiskeySockets (Auto QR di Web Console).
 • 🔵 **Bot Telegram:** Python 3.11 & Node.js 20 (Aiogram / Telegraf).
 • ⛏️ **Minecraft Java:** Paper & Purpur TPS stabil 20.0 dengan Java Selector.
-• 🚀 **Aplikasi Linux:** Container Docker kustom dengan alokasi port mandiri.
 
 ⚡ *Semua server otomatis dibuat & aktif dalam 5-10 detik setelah pembayaran QRIS/VA!*`;
 

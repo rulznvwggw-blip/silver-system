@@ -39,11 +39,10 @@ export async function handleStore300Catalog(
 
   // 2. Category Tabs
   keyboard
-    .text(category === 'whatsapp' ? '• 🟢 WA (25) •' : '🟢 WhatsApp', `s300_nav_${duration}_whatsapp_1`)
-    .text(category === 'telegram' ? '• 🔵 TG (25) •' : '🔵 Telegram', `s300_nav_${duration}_telegram_1`)
+    .text(category === 'whatsapp' ? '• 🟢 WA Bot (25) •' : '🟢 WhatsApp Bot', `s300_nav_${duration}_whatsapp_1`)
+    .text(category === 'telegram' ? '• 🔵 TG Bot (25) •' : '🔵 Telegram Bot', `s300_nav_${duration}_telegram_1`)
     .row()
-    .text(category === 'minecraft' ? '• ⛏️ Minecraft (25) •' : '⛏️ Minecraft', `s300_nav_${duration}_minecraft_1`)
-    .text(category === 'vps' ? '• 🚀 Linux VPS (25) •' : '🚀 Linux VPS', `s300_nav_${duration}_vps_1`)
+    .text(category === 'minecraft' ? '• ⛏️ Minecraft (25) •' : '⛏️ Minecraft Java', `s300_nav_${duration}_minecraft_1`)
     .row();
 
   // 3. Product Plan Buttons
@@ -74,7 +73,7 @@ export async function handleStore300Catalog(
     .text('🏠 Menu Utama', 'menu_main');
 
   const durLabel = duration === '7d' ? '⚡ 7 HARI (TRIAL / MINGGUAN)' : duration === '14d' ? '🔥 14 HARI (2 MINGGU)' : '🚀 30 HARI (BULANAN)';
-  const catLabel = category === 'whatsapp' ? '🟢 BOT WHATSAPP (BAILEYS)' : category === 'telegram' ? '🔵 BOT TELEGRAM (PYTHON/NODE)' : category === 'minecraft' ? '⛏️ MINECRAFT JAVA EDITION' : '🚀 LINUX VPS CONTAINER';
+  const catLabel = category === 'whatsapp' ? '🟢 BOT WHATSAPP (BAILEYS)' : category === 'telegram' ? '🔵 BOT TELEGRAM (PYTHON/NODE)' : '⛏️ MINECRAFT JAVA EDITION';
 
   const text = `🛒 **KATALOG SERVER HOSTING RULLZYESTORE**
 ━━━━━━━━━━━━━━━━━━━━

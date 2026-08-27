@@ -24,12 +24,11 @@ async function runDiagnosticsAndTests() {
   console.log(`      • Email    : ${pteroUser.user.email}`);
   console.log(`      • Password : ${pteroUser.generatedPassword}\n`);
 
-  // Test Categories
+  // Test Categories (WA, TG, Minecraft)
   const categories = [
     { cat: 'whatsapp', name: 'Test WA Baileys Ready' },
     { cat: 'telegram', name: 'Test Telegram Python Ready' },
-    { cat: 'minecraft', name: 'Test Minecraft Java Ready' },
-    { cat: 'vps', name: 'Test Debian Linux Ready' }
+    { cat: 'minecraft', name: 'Test Minecraft Java Ready' }
   ];
 
   const results: any[] = [];

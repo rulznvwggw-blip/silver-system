@@ -223,19 +223,6 @@ PANDUAN MENJALANKAN SERVER:
       await fs.writeFile(path.join(volPath, 'eula.txt'), 'eula=true\n');
       await fs.writeFile(path.join(volPath, 'server.properties'), serverProps);
       await fs.writeFile(path.join(volPath, 'README.txt'), readme);
-
-    } else if (category === 'vps') {
-      const readme = `=========================================================
-🚀 RULLZYE STORE CLOUD - LINUX VPS CONTAINER SIAP PAKAI
-=========================================================
-Status Server : SIAP DIGUNAKAN (READY TO USE)
-Node Host     : ${PUBLIC_NODE_DOMAIN}
-Alokasi Port  : ${port}
-
-Container Linux Debian siap digunakan 24 jam nonstop.
-=========================================================
-`;
-      await fs.writeFile(path.join(volPath, 'README.txt'), readme);
     }
 
     // Set ownership to pterodactyl daemon user (999:984)
@@ -326,10 +313,6 @@ export const pterodactylService = {
       eggId = 16;
       image = 'ghcr.io/parkervcp/yolks:python_3.11';
       startup = 'if [[ -f package.json ]]; then if [[ ! -d node_modules ]]; then npm install; fi; node {{BOT_START_FILE}}; elif [[ -f requirements.txt ]]; then pip install -r requirements.txt; python3 {{BOT_START_FILE}}; else python3 {{BOT_START_FILE}}; fi';
-    } else if (pkg.category === 'vps') {
-      eggId = 18;
-      image = 'ghcr.io/parkervcp/yolks:debian';
-      startup = 'bash';
     }
 
     const phpCode = `
@@ -339,9 +322,9 @@ export const pterodactylService = {
       }
       
       $node = Pterodactyl\\Models\\Node::find(1);
-      $alloc = Pterodactyl\\Models\\Allocation::where('node_id', 1)->whereNull('server_id')->first();
+      $alloc = Pterodactyl\\Models\\Allocation::where('node_id', 1)->whereNull('server_id')->where('port', '>=', 25570)->first();
       if (!$alloc) {
-        $maxPort = Pterodactyl\\Models\\Allocation::where('node_id', 1)->max('port') ?? 3000;
+        $maxPort = Pterodactyl\\Models\\Allocation::where('node_id', 1)->where('port', '>=', 25570)->max('port') ?? 25570;
         $alloc = Pterodactyl\\Models\\Allocation::create([
           'node_id' => 1,
           'ip' => '0.0.0.0',
