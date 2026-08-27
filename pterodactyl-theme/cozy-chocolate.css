@@ -1,0 +1,542 @@
+/* ==========================================================================
+   ☕ RULLZYE STORE CLOUD - COZY CHOCOLATE ULTRA THEME FOR PTERODACTYL PANEL
+   Palette: Rich Espresso, Warm Mocha, Caramel Amber & Glowing Bronze
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --cozy-bg-deep: #100a07;
+  --cozy-bg-main: #160e0a;
+  --cozy-bg-surface: #1e130d;
+  --cozy-bg-card: #251811;
+  --cozy-bg-card-hover: #311f16;
+  --cozy-bg-card-active: #3d271c;
+  
+  --cozy-caramel: #d97736;
+  --cozy-caramel-hover: #e68545;
+  --cozy-caramel-light: #f59e0b;
+  --cozy-gold: #fbbf24;
+  --cozy-cream: #fdfbf7;
+  --cozy-latte: #e8ded1;
+  --cozy-mocha-text: #bfa995;
+  --cozy-mocha-muted: #8c7663;
+  
+  --cozy-border: rgba(217, 119, 54, 0.18);
+  --cozy-border-hover: rgba(217, 119, 54, 0.45);
+  --cozy-glow: rgba(217, 119, 54, 0.35);
+  --cozy-glow-soft: rgba(217, 119, 54, 0.15);
+  
+  --cozy-status-online: #10b981;
+  --cozy-status-starting: #f59e0b;
+  --cozy-status-stopping: #f97316;
+  --cozy-status-offline: #ef4444;
+
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* Base Body & Global Styles */
+html, body {
+  font-family: var(--font-main) !important;
+  background-color: var(--cozy-bg-main) !important;
+  color: var(--cozy-cream) !important;
+  background-image: 
+    radial-gradient(circle at 15% 10%, rgba(217, 119, 54, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(26, 17, 11, 0.5) 0%, transparent 100%) !important;
+  background-attachment: fixed !important;
+  min-height: 100vh;
+}
+
+/* Custom Cozy Scrollbars */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cozy-bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3d271c, #d97736);
+  border-radius: 999px;
+  border: 2px solid var(--cozy-bg-deep);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d97736, #f59e0b);
+}
+
+/* Selection Color */
+::selection {
+  background: rgba(217, 119, 54, 0.4);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   REACT CLIENT OVERRIDES (Pterodactyl Frontend)
+   ========================================================================== */
+
+/* Background Overrides */
+div[class*="bg-neutral-900"],
+div[class*="bg-neutral-800"],
+div[class*="bg-neutral-950"],
+main,
+section,
+.bg-neutral-900,
+.bg-neutral-800,
+.bg-neutral-950,
+.bg-black {
+  background-color: var(--cozy-bg-surface) !important;
+}
+
+div[class*="bg-neutral-700"],
+.bg-neutral-700 {
+  background-color: var(--cozy-bg-card) !important;
+}
+
+div[class*="bg-neutral-600"],
+.bg-neutral-600 {
+  background-color: var(--cozy-bg-card-hover) !important;
+}
+
+/* Header & Top Navigation Bar */
+header,
+nav[class*="bg-neutral"],
+div[class*="NavigationBar"] {
+  background: rgba(22, 14, 10, 0.85) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 1px solid var(--cozy-border) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px var(--cozy-glow-soft) !important;
+}
+
+/* Subnavigation Bar */
+div[class*="SubNavigation"],
+div[class*="SubNavigation"] nav {
+  background: rgba(30, 19, 13, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--cozy-border) !important;
+}
+
+/* Navigation Links & Tabs */
+div[class*="SubNavigation"] a,
+nav a {
+  color: var(--cozy-mocha-text) !important;
+  font-weight: 600 !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 8px !important;
+  position: relative !important;
+}
+
+div[class*="SubNavigation"] a:hover,
+nav a:hover {
+  color: var(--cozy-cream) !important;
+  background: rgba(217, 119, 54, 0.12) !important;
+}
+
+div[class*="SubNavigation"] a[class*="active"],
+div[class*="SubNavigation"] a.active,
+nav a[class*="active"] {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, rgba(217, 119, 54, 0.3), rgba(245, 158, 11, 0.15)) !important;
+  border-bottom: 2px solid var(--cozy-caramel) !important;
+  box-shadow: 0 0 12px var(--cozy-glow-soft) !important;
+}
+
+/* Server Cards on Dashboard */
+div[class*="ServerRow"],
+div[class*="server-row"],
+div[class*="ServerCard"],
+div[class*="bg-neutral-800"][class*="rounded"] {
+  background: linear-gradient(145deg, #1f140e, #291a13) !important;
+  border: 1px solid var(--cozy-border) !important;
+  border-radius: 14px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+div[class*="ServerRow"]:hover,
+div[class*="server-row"]:hover,
+div[class*="ServerCard"]:hover {
+  transform: translateY(-3px) scale(1.008) !important;
+  border-color: var(--cozy-border-hover) !important;
+  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px var(--cozy-glow-soft) !important;
+  background: linear-gradient(145deg, #261912, #332017) !important;
+}
+
+/* Server Card Status Indicator Line */
+div[class*="ServerRow"]::before,
+div[class*="ServerCard"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--cozy-caramel), var(--cozy-caramel-light));
+  opacity: 0.85;
+}
+
+/* Terminal & Console */
+div[class*="Terminal"],
+div[class*="console"],
+.terminal,
+div[class*="xterm"] {
+  background-color: var(--cozy-bg-deep) !important;
+  border: 1px solid var(--cozy-border) !important;
+  border-radius: 14px !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8), 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+  font-family: var(--font-mono) !important;
+}
+
+/* Terminal Input Line */
+div[class*="CommandInput"],
+input[class*="CommandInput"] {
+  background: #180f0a !important;
+  border: 1px solid var(--cozy-border) !important;
+  color: var(--cozy-cream) !important;
+  border-radius: 10px !important;
+  font-family: var(--font-mono) !important;
+}
+input[class*="CommandInput"]:focus {
+  border-color: var(--cozy-caramel) !important;
+  box-shadow: 0 0 12px var(--cozy-glow) !important;
+}
+
+/* Action Control Buttons (Start, Restart, Stop, Kill) */
+button[class*="bg-primary"],
+button[class*="bg-cyan"],
+.bg-cyan-500,
+.bg-cyan-600 {
+  background: linear-gradient(135deg, var(--cozy-caramel), #c46427) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 15px var(--cozy-glow-soft) !important;
+  transition: all 0.25s ease !important;
+}
+
+button[class*="bg-primary"]:hover,
+button[class*="bg-cyan"]:hover,
+.bg-cyan-500:hover,
+.bg-cyan-600:hover {
+  background: linear-gradient(135deg, var(--cozy-caramel-hover), var(--cozy-caramel)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px var(--cozy-glow) !important;
+}
+
+/* Start Button */
+button:has(svg)[class*="green"],
+button[class*="bg-emerald"],
+button[class*="bg-green"] {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3) !important;
+  border-radius: 10px !important;
+}
+button:has(svg)[class*="green"]:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Stop Button */
+button:has(svg)[class*="red"],
+button[class*="bg-rose"],
+button[class*="bg-red"] {
+  background: linear-gradient(135deg, #f43f5e, #be123c) !important;
+  box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3) !important;
+  border-radius: 10px !important;
+}
+
+/* Restart Button */
+button:has(svg)[class*="yellow"],
+button[class*="bg-amber"],
+button[class*="bg-yellow"] {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3) !important;
+  border-radius: 10px !important;
+}
+
+/* Modal Dialogs & Popup Cards */
+div[class*="Modal"],
+div[class*="Dialog"],
+div[role="dialog"] {
+  background: rgba(28, 18, 12, 0.95) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--cozy-border-hover) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px var(--cozy-glow-soft) !important;
+}
+
+/* Inputs & Form Controls */
+input,
+select,
+textarea,
+div[class*="Input"],
+div[class*="Select"] {
+  background-color: #170f0a !important;
+  border: 1px solid var(--cozy-border) !important;
+  color: var(--cozy-cream) !important;
+  border-radius: 9px !important;
+  transition: all 0.2s ease !important;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--cozy-caramel) !important;
+  box-shadow: 0 0 10px var(--cozy-glow) !important;
+  outline: none !important;
+}
+
+/* Text Colors */
+.text-neutral-100, .text-neutral-200, .text-white {
+  color: var(--cozy-cream) !important;
+}
+.text-neutral-300, .text-neutral-400 {
+  color: var(--cozy-mocha-text) !important;
+}
+.text-neutral-500, .text-neutral-600 {
+  color: var(--cozy-mocha-muted) !important;
+}
+.text-cyan-400, .text-cyan-500, .text-primary-400, .text-primary-500 {
+  color: var(--cozy-caramel-light) !important;
+}
+
+/* Table Enhancements */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 4px !important;
+}
+table tr {
+  background: rgba(30, 20, 14, 0.6) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+table tr:hover {
+  background: rgba(43, 28, 20, 0.85) !important;
+}
+table th {
+  color: var(--cozy-caramel-light) !important;
+  font-weight: 700 !important;
+  border-bottom: 1px solid var(--cozy-border) !important;
+}
+
+/* ==========================================================================
+   ADMINLTE ADMIN DASHBOARD OVERRIDES (Pterodactyl Admin Panel)
+   ========================================================================== */
+
+.skin-blue .main-header .navbar {
+  background: linear-gradient(90deg, #180f0a, #261710) !important;
+  border-bottom: 1px solid var(--cozy-border) !important;
+}
+.skin-blue .main-header .logo {
+  background: #140c08 !important;
+  color: var(--cozy-caramel-light) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px;
+  border-right: 1px solid var(--cozy-border) !important;
+}
+.skin-blue .main-header .logo:hover {
+  background: #1d120c !important;
+}
+.skin-blue .main-sidebar,
+.skin-blue .left-side {
+  background: #140c08 !important;
+  border-right: 1px solid var(--cozy-border) !important;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4) !important;
+}
+.skin-blue .sidebar-menu > li.header {
+  color: var(--cozy-caramel-light) !important;
+  background: #100906 !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px;
+  font-size: 11px;
+}
+.skin-blue .sidebar-menu > li > a {
+  color: var(--cozy-latte) !important;
+  font-weight: 600 !important;
+  border-left: 3px solid transparent !important;
+  transition: all 0.2s ease !important;
+}
+.skin-blue .sidebar-menu > li:hover > a,
+.skin-blue .sidebar-menu > li.active > a {
+  color: #ffffff !important;
+  background: linear-gradient(90deg, rgba(217, 119, 54, 0.25), transparent) !important;
+  border-left-color: var(--cozy-caramel) !important;
+}
+.content-wrapper,
+.right-side {
+  background-color: var(--cozy-bg-main) !important;
+}
+.content-header > h1 {
+  color: var(--cozy-cream) !important;
+  font-weight: 800 !important;
+}
+.content-header > h1 > small {
+  color: var(--cozy-mocha-text) !important;
+}
+
+/* AdminLTE Box / Cards */
+.box {
+  background: var(--cozy-bg-surface) !important;
+  border: 1px solid var(--cozy-border) !important;
+  border-top: 3px solid var(--cozy-caramel) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+.box.box-primary {
+  border-top-color: var(--cozy-caramel) !important;
+}
+.box.box-success {
+  border-top-color: var(--cozy-status-online) !important;
+}
+.box.box-warning {
+  border-top-color: var(--cozy-caramel-light) !important;
+}
+.box.box-danger {
+  border-top-color: var(--cozy-status-offline) !important;
+}
+.box-header {
+  color: var(--cozy-cream) !important;
+  border-bottom: 1px solid var(--cozy-border) !important;
+}
+.box-title {
+  font-weight: 700 !important;
+}
+.box-footer {
+  background: #170e0a !important;
+  border-top: 1px solid var(--cozy-border) !important;
+}
+
+/* Info Box */
+.info-box {
+  background: var(--cozy-bg-surface) !important;
+  border: 1px solid var(--cozy-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25) !important;
+}
+.info-box-icon {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+  background: linear-gradient(135deg, var(--cozy-caramel), #a35322) !important;
+  color: #ffffff !important;
+}
+.info-box-text {
+  color: var(--cozy-mocha-text) !important;
+  font-weight: 600 !important;
+}
+.info-box-number {
+  color: var(--cozy-cream) !important;
+  font-weight: 800 !important;
+}
+
+/* Admin Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--cozy-caramel), #b85e25) !important;
+  border-color: var(--cozy-caramel) !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--cozy-caramel-hover), var(--cozy-caramel)) !important;
+  box-shadow: 0 4px 15px var(--cozy-glow) !important;
+}
+
+/* ==========================================================================
+   ☕ COZY STEAM LOADING OVERLAY & PULSE ANIMATIONS
+   ========================================================================== */
+
+@keyframes steamWave1 {
+  0% { transform: translateY(0) scaleX(1); opacity: 0; }
+  30% { opacity: 0.8; }
+  100% { transform: translateY(-30px) scaleX(1.3) rotate(-5deg); opacity: 0; }
+}
+
+@keyframes steamWave2 {
+  0% { transform: translateY(0) scaleX(1); opacity: 0; }
+  35% { opacity: 0.9; }
+  100% { transform: translateY(-34px) scaleX(1.4) rotate(6deg); opacity: 0; }
+}
+
+@keyframes ambientPulse {
+  0%, 100% { box-shadow: 0 0 25px rgba(217, 119, 54, 0.3), 0 0 50px rgba(217, 119, 54, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(217, 119, 54, 0.6), 0 0 80px rgba(245, 158, 11, 0.25); }
+}
+
+@keyframes cozyShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Cozy Custom Loading Overlay Element */
+#cozy-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: radial-gradient(circle at 50% 45%, #23160f 0%, #100906 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#cozy-loading-screen.cozy-loaded {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.cozy-coffee-cup-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2b1b13, #1a100a);
+  border: 2px solid var(--cozy-border-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ambientPulse 3s infinite ease-in-out;
+  margin-bottom: 20px;
+}
+
+.cozy-steam {
+  position: absolute;
+  top: -18px;
+  width: 4px;
+  height: 18px;
+  background: linear-gradient(to top, rgba(217, 119, 54, 0.8), transparent);
+  border-radius: 4px;
+}
+.cozy-steam-1 { left: 34px; animation: steamWave1 2.2s infinite ease-out; }
+.cozy-steam-2 { left: 43px; animation: steamWave2 2.5s infinite ease-out 0.4s; }
+.cozy-steam-3 { left: 52px; animation: steamWave1 2.3s infinite ease-out 0.8s; }
+
+.cozy-coffee-icon {
+  font-size: 38px;
+  color: var(--cozy-caramel);
+  filter: drop-shadow(0 2px 8px var(--cozy-glow));
+}
+
+.cozy-loading-title {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--cozy-cream);
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #fdfbf7 0%, #d97736 50%, #fdfbf7 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: cozyShimmer 3s linear infinite;
+}
+
+.cozy-loading-sub {
+  font-size: 12px;
+  color: var(--cozy-mocha-text);
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
