@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { SUPER_ADMIN_ID, CommunityType, BroadcastStatus } from '../config/constants.js';
 import { env } from '../config/env.js';
+import { ALL_200_PRODUCTS } from '../data/products200.js';
 
 // Ensure data directory exists
 const dataDir = path.resolve(process.cwd(), 'data');
@@ -320,36 +321,65 @@ if (!adminCheck) {
 }
 
 // Seed Categories
-const catCount = (sqlite.prepare('SELECT count(*) as count FROM categories').get() as any).count;
-if (catCount === 0) {
-  const insertCat = sqlite.prepare('INSERT INTO categories (id, name, description, icon, is_active) VALUES (?, ?, ?, ?, ?)');
-  insertCat.run('whatsapp', 'Bot WhatsApp', 'Hosting Bot Baileys / Node.js 24 Jam', '🟢', 1);
-  insertCat.run('telegram', 'Bot Telegram', 'Hosting Python 3.11 & Node.js Telegraf', '🔵', 1);
-  insertCat.run('minecraft', 'Minecraft Java', 'Paper & Purpur Server TPS 20.0', '⛏️', 1);
-}
+const insertCat = sqlite.prepare(`
+  INSERT INTO categories (id, name, description, icon, is_active)
+  VALUES (?, ?, ?, ?, ?)
+  ON CONFLICT(id) DO UPDATE SET name=excluded.name, description=excluded.description, icon=excluded.icon, is_active=1
+`);
+insertCat.run('whatsapp', 'Bot WhatsApp', 'Hosting Bot Baileys Node.js 20 & Multi-Session 24 Jam', '🟢', 1);
+insertCat.run('telegram', 'Bot Telegram', 'Hosting Python 3.11 & Node.js Telegraf 24 Jam', '🔵', 1);
+insertCat.run('minecraft', 'Minecraft Java', 'Paper & Purpur Server TPS 20.0 Anti-DDoS 100G', '⛏️', 1);
+insertCat.run('application', 'App Cloud & API', 'Hosting Express.js, FastAPI, Flask & Custom Linux App', '🚀', 1);
 
-// Seed Initial Products
-const prodCount = (sqlite.prepare('SELECT count(*) as count FROM products').get() as any).count;
-if (prodCount === 0) {
-  const insertProd = sqlite.prepare(`
-    INSERT INTO products (id, category_id, name, price, ram_mb, cpu_percent, disk_gb, duration_days, duration_label, badge, description, is_featured, is_popular, is_new, is_premium, stock, is_active, egg_id, docker_image, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+// Seed / Sync All 200 Products
+const insertProd = sqlite.prepare(`
+  INSERT INTO products (id, category_id, name, price, ram_mb, cpu_percent, disk_gb, duration_days, duration_label, badge, description, is_featured, is_popular, is_new, is_premium, stock, is_active, egg_id, docker_image, created_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(id) DO UPDATE SET 
+    category_id=excluded.category_id,
+    name=excluded.name,
+    price=excluded.price,
+    ram_mb=excluded.ram_mb,
+    cpu_percent=excluded.cpu_percent,
+    disk_gb=excluded.disk_gb,
+    duration_days=excluded.duration_days,
+    duration_label=excluded.duration_label,
+    badge=excluded.badge,
+    description=excluded.description,
+    is_featured=excluded.is_featured,
+    is_popular=excluded.is_popular,
+    is_new=excluded.is_new,
+    is_premium=excluded.is_premium,
+    stock=excluded.stock,
+    is_active=1,
+    egg_id=excluded.egg_id,
+    docker_image=excluded.docker_image
+`);
 
-  const now = new Date().toISOString();
-  // WhatsApp Products
-  insertProd.run('wa-starter-30d', 'whatsapp', 'WA Bot Starter (512MB)', 2000, 512, 50, 2, 30, '30 Hari', 'HEMAT', 'Optimasi Baileys Node.js 20. Scan QR langsung di web console.', 1, 1, 0, 0, 999, 1, 15, 'ghcr.io/pterodactyl/yolks:nodejs_20', now);
-  insertProd.run('wa-pro-30d', 'whatsapp', 'WA Bot Pro (2GB)', 7000, 2048, 150, 5, 30, '30 Hari', 'POPULER', 'High Traffic Baileys & Multi-Device Bot 24/7.', 1, 1, 0, 1, 999, 1, 15, 'ghcr.io/pterodactyl/yolks:nodejs_20', now);
-  insertProd.run('wa-enterprise-30d', 'whatsapp', 'WA Bot Ultimate (8GB)', 25000, 8192, 300, 20, 30, '30 Hari', 'PREMIUM', 'Dedicated RAM & CPU untuk bot broadcast ribuan member.', 0, 0, 1, 1, 999, 1, 15, 'ghcr.io/pterodactyl/yolks:nodejs_20', now);
-
-  // Telegram Products
-  insertProd.run('tg-starter-30d', 'telegram', 'TG Bot Starter (512MB)', 2000, 512, 45, 2, 30, '30 Hari', 'STARTER', 'Python 3.11 & Node.js Telegraf dengan auto-restart.', 1, 1, 0, 0, 999, 1, 16, 'ghcr.io/pterodactyl/yolks:python_3.11', now);
-  insertProd.run('tg-pro-30d', 'telegram', 'TG Bot Pro (2GB)', 6000, 2048, 120, 5, 30, '30 Hari', 'FAVORIT', 'AI Bot, Webhook & database SQLite ready.', 1, 1, 0, 1, 999, 1, 16, 'ghcr.io/pterodactyl/yolks:python_3.11', now);
-
-  // Minecraft Products
-  insertProd.run('mc-smp-30d', 'minecraft', 'Minecraft SMP (2GB)', 9000, 2048, 150, 10, 30, '30 Hari', 'MABAR SMP', 'Purpur/Paper 1.20.4 siap pakai 5-10 Player TPS 20.0.', 1, 1, 0, 0, 999, 1, 2, 'ghcr.io/pterodactyl/yolks:java_21', now);
-  insertProd.run('mc-pro-30d', 'minecraft', 'Minecraft Survival Pro (4GB)', 18000, 4096, 250, 20, 30, '30 Hari', 'POPULER', '15-25 Player Mabar dengan Anti-DDoS 100 Gbps.', 1, 1, 1, 1, 999, 1, 2, 'ghcr.io/pterodactyl/yolks:java_21', now);
-  insertProd.run('mc-network-30d', 'minecraft', 'Minecraft Dedicated (8GB)', 35000, 8192, 400, 40, 30, '30 Hari', 'NETWORK', 'Bungeecord / Velocity 50+ Player Mabar stabil.', 0, 0, 0, 1, 999, 1, 2, 'ghcr.io/pterodactyl/yolks:java_21', now);
+const nowIso = new Date().toISOString();
+for (const p of ALL_200_PRODUCTS) {
+  insertProd.run(
+    p.id,
+    p.category_id,
+    p.name,
+    p.price,
+    p.ram_mb,
+    p.cpu_percent,
+    p.disk_gb,
+    p.duration_days,
+    p.duration_label,
+    p.badge,
+    p.description,
+    p.is_featured ? 1 : 0,
+    p.is_popular ? 1 : 0,
+    p.is_new ? 1 : 0,
+    p.is_premium ? 1 : 0,
+    p.stock,
+    1,
+    p.egg_id,
+    p.docker_image,
+    nowIso
+  );
 }
 
 // Seed Initial Coupons

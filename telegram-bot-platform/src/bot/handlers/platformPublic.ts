@@ -118,7 +118,7 @@ export async function handlePubProducts(ctx: Context, page = 1): Promise<void> {
 
 export async function handlePubCategories(ctx: Context): Promise<void> {
   const categories = await db.getCategories();
-  const header = createCozyHeader('🗂️ KATEGORI PRODUK', 'Pilih kategori server yang Anda butuhkan');
+  const header = createCozyHeader('🗂️ KATEGORI PRODUK (200 PILIHAN)', 'Pilih kategori server yang Anda butuhkan');
   let body = `${header}\n\n`;
 
   const keyboard = new InlineKeyboard();
@@ -128,6 +128,47 @@ export async function handlePubCategories(ctx: Context): Promise<void> {
   });
 
   keyboard.text('⬅️ Kembali', 'nav_pub_store').text('🏠 Home', 'nav_pub_home');
+  await sendOrEdit(ctx, body, keyboard);
+}
+
+export async function handlePubCategoryProducts(ctx: Context, categoryId: string, page = 1): Promise<void> {
+  const products = await db.getProducts({ category_id: categoryId });
+  const pageSize = 5;
+  const totalPages = Math.ceil(products.length / pageSize) || 1;
+  const safePage = Math.max(1, Math.min(page, totalPages));
+  const current = products.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  const catNames: Record<string, string> = {
+    whatsapp: '🟢 BOT WHATSAPP (60 PAKET)',
+    telegram: '🔵 BOT TELEGRAM (60 PAKET)',
+    minecraft: '⛏️ MINECRAFT JAVA & BEDROCK (60 PAKET)',
+    application: '🚀 APP CLOUD & API (20 PAKET)',
+  };
+
+  const title = catNames[categoryId] || `🗂️ KATEGORI ${categoryId.toUpperCase()}`;
+  const header = createCozyHeader(title, `Halaman ${safePage} dari ${totalPages} (Total ${products.length} Pilihan)`);
+  let body = `${header}\n\n`;
+
+  const keyboard = new InlineKeyboard();
+
+  if (current.length === 0) {
+    body += `_Belum ada paket produk di kategori ini._\n\n`;
+  } else {
+    current.forEach(p => {
+      body += `• **${p.name}** [${p.badge}]\n  💰 \`${formatRupiah(p.price)}/${p.duration_label}\` | RAM: \`${p.ram_mb}MB\` • Disk: \`${p.disk_gb}GB\`\n  _${p.description}_\n\n`;
+      keyboard.text(`👉 Pilih ${p.name.slice(0, 18)}...`, `prod_view_${p.id}`).row();
+    });
+  }
+
+  // Pagination for category
+  const navRow = [];
+  if (safePage > 1) navRow.push(InlineKeyboard.text('⬅️ Prev', `cat_page_${categoryId}_${safePage - 1}`));
+  navRow.push(InlineKeyboard.text(`📄 ${safePage}/${totalPages}`, 'noop'));
+  if (safePage < totalPages) navRow.push(InlineKeyboard.text('Next ➡️', `cat_page_${categoryId}_${safePage + 1}`));
+  keyboard.row(...navRow);
+
+  keyboard.row().text('🗂️ Semua Kategori', 'nav_pub_categories').text('🏠 Home', 'nav_pub_home');
+
   await sendOrEdit(ctx, body, keyboard);
 }
 

@@ -2,6 +2,7 @@ export type ProductCategory =
   | 'whatsapp'
   | 'telegram'
   | 'minecraft'
+  | 'application'
   | 'siao'
   | 'generic';
 

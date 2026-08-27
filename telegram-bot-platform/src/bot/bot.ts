@@ -68,6 +68,7 @@ import {
   handlePubPrivacy,
   handlePubTerms,
   handlePubAbout,
+  handlePubCategoryProducts,
   handleProductDetailView,
   handleBuyProductWithBalance,
 } from './handlers/platformPublic.js';
@@ -445,23 +446,13 @@ export function createBot(): Bot<Context> {
     await handlePubPreferences(ctx);
   });
 
-  // Category Filter
+  // Category Filter & Pagination (200 Products Divided by Categories)
   bot.callbackQuery(/^cat_filter_(.+)$/, async (ctx) => {
-    const catId = ctx.match[1];
-    const prods = await db.getProducts({ category_id: catId });
-    const header = `╭──────────────────────────────────╮\n│  🗂️ KATEGORI: ${catId.toUpperCase()}\n╰──────────────────────────────────╯`;
-    let body = `${header}\n\n`;
+    await handlePubCategoryProducts(ctx, ctx.match[1], 1);
+  });
 
-    const keyboard = new InlineKeyboard();
-    prods.forEach(p => {
-      body += `• **${p.name}** — \`${formatRupiah(p.price)}\`\n`;
-      keyboard.text(`👉 Lihat ${p.name.slice(0, 18)}`, `prod_view_${p.id}`).row();
-    });
-
-    keyboard.text('⬅️ Kembali ke Kategori', 'nav_pub_categories').text('🏠 Home', 'nav_pub_home');
-    if (ctx.callbackQuery?.message) {
-      await ctx.api.editMessageText(ctx.chat!.id, ctx.callbackQuery.message.message_id, body, { parse_mode: 'Markdown', reply_markup: keyboard });
-    }
+  bot.callbackQuery(/^cat_page_([a-z0-9_-]+)_(\d+)$/, async (ctx) => {
+    await handlePubCategoryProducts(ctx, ctx.match[1], parseInt(ctx.match[2], 10));
   });
 
   // Community Searches

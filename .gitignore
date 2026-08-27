@@ -1,8 +1,11 @@
-data/
+/data/
 node_modules/
 dist/
 .next/
 *.log
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
 cloudflared.log
 .DS_Store
 .env.local
