@@ -10,7 +10,8 @@
     "worker": "tsx src/queue/workers/broadcastWorker.ts",
     "scheduler": "tsx src/queue/workers/schedulerWorker.ts",
     "db:seed": "tsx src/database/seed.ts",
-    "test:servers": "tsx src/scripts/testServerProvisioning.ts"
+    "test:servers": "tsx src/scripts/testServerProvisioning.ts",
+    "audit:nav": "tsx src/scripts/auditNavigations.ts"
   },
   "dependencies": {
     "@grammyjs/hydrate": "^1.4.1",
